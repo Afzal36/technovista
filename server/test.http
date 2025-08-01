@@ -56,3 +56,14 @@ Content-Type: application/json
   "category": "plumber",
   "assignedTo": "Technician A"
 }
+
+
+###
+post http://localhost:5000/api/reports/assigned
+Content-Type: application/json
+
+{
+  "assignedTo": "Technician A"
+}
+
+
