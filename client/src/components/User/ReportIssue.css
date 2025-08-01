@@ -1,0 +1,293 @@
+/* CSS Custom Properties */
+:root {
+  --soft-cream: #FAF7F2;
+  --charcoal-black: #1A1A1A;
+  --muted-gray: #333333;
+  --fresh-green: #5CAC3D;
+  --leaf-green: #4E9530;
+  --pure-white: #FFFFFF;
+  --warm-beige: #EDE8DF;
+}
+
+/* Main Container */
+.report-issue-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: var(--pure-white);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.report-title {
+  color: var(--charcoal-black);
+  font-size: 24px;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* Form Styles */
+.report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Upload Section */
+.upload-section {
+  position: relative;
+  min-height: 300px;
+  border: 2px dashed var(--warm-beige);
+  border-radius: 8px;
+  background-color: var(--soft-cream);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.upload-section:hover {
+  border-color: var(--fresh-green);
+}
+
+.drag-active {
+  border-color: var(--fresh-green);
+  background-color: rgba(92, 172, 61, 0.1);
+}
+
+.has-image {
+  border-style: solid;
+  background-color: var(--pure-white);
+}
+
+.file-input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.upload-prompt {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: var(--muted-gray);
+}
+
+.upload-icon {
+  color: var(--fresh-green);
+  opacity: 0.8;
+}
+
+.upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--fresh-green);
+  color: var(--pure-white);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upload-btn:hover {
+  background-color: var(--leaf-green);
+  transform: translateY(-2px);
+}
+
+/* Image Preview */
+.image-preview-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+}
+
+.image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.clear-image-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: var(--charcoal-black);
+  color: var(--pure-white);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clear-image-btn:hover {
+  background-color: #333;
+  transform: scale(1.1);
+}
+
+/* Form Groups */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  color: var(--charcoal-black);
+  font-weight: 500;
+}
+
+/* Category Select */
+.select-wrapper {
+  position: relative;
+}
+
+.category-select {
+  width: 100%;
+  padding: 0.75rem;
+  padding-right: 2.5rem;
+  border: 1px solid var(--warm-beige);
+  border-radius: 6px;
+  background-color: var(--pure-white);
+  color: var(--charcoal-black);
+  appearance: none;
+  cursor: pointer;
+}
+
+.select-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted-gray);
+  pointer-events: none;
+}
+
+/* Urgency Buttons */
+.urgency-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.urgency-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--warm-beige);
+  border-radius: 6px;
+  background-color: var(--pure-white);
+  color: var(--charcoal-black);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.urgency-btn:hover {
+  border-color: var(--fresh-green);
+}
+
+.urgency-btn.selected {
+  background-color: var(--fresh-green);
+  border-color: var(--fresh-green);
+  color: var(--pure-white);
+}
+
+/* Description Input */
+.description-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--warm-beige);
+  border-radius: 6px;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.description-input:focus {
+  border-color: var(--fresh-green);
+  outline: none;
+}
+
+/* Submit Button */
+.submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: var(--fresh-green);
+  color: var(--pure-white);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: var(--leaf-green);
+  transform: translateY(-2px);
+}
+
+.submit-btn:disabled {
+  background-color: var(--warm-beige);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.submit-btn.loading {
+  cursor: wait;
+}
+
+/* Animations */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .report-issue-container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .upload-section {
+    min-height: 200px;
+  }
+
+  .image-preview-container {
+    height: 200px;
+  }
+
+  .urgency-buttons {
+    flex-direction: column;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .submit-btn:hover,
+  .upload-btn:hover,
+  .clear-image-btn:hover {
+    transform: none;
+  }
+  
+  .spin-icon {
+    animation: none;
+  }
+}
