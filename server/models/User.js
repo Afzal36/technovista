@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   phone: String,
   name: String,
   role: { type: String },
+  field: { type: String }, // ✅ NEW FIELD
   createdAt: { type: Date, default: Date.now }
 });
 
