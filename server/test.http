@@ -20,3 +20,18 @@ GET http://localhost:5000/api/technicians/register
 
 ###
 POST http://localhost:5000/api/admin/accept-technician/688ce46af933c376c0506587
+
+###
+POST http://localhost:5000/api/users/signup
+Content-Type: application/json
+
+{
+  "uid": "abc1234",
+  "email": "example1@email.com",
+  "password": "yourStrongPassword123",
+  "phone": "9876543210",
+  "name": "John Doe",
+  "role": "technician",
+  "field": "electrical"
+}
+
