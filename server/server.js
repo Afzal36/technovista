@@ -7,6 +7,7 @@ const userRoutes = require("./routes/userRoutes");
 const adminActions = require('./routes/adminactions');
 const technicianRoutes = require("./routes/technicianRoutes");
 const authRoute = require("./routes/auth");
+const minimalReportRoutes = require('./routes/minimalReport');
 
 dotenv.config();
 
@@ -32,3 +33,4 @@ app.use("/api/auth", authRoute);
 app.use('/api/admin', adminActions);
 app.use("/api/image", imageClassifierRoute);
 app.use("/api/users", userRoutes);
+app.use('/api/issues', minimalReportRoutes);

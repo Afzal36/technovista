@@ -43,3 +43,15 @@ Content-Type: application/json
   "mail": "srikarjanjirala92@gmail.com",
   "pass": "9a2216a5"
 }
+
+
+###
+POST http://localhost:5000/api/issues/minimal-report
+Content-Type: application/json
+
+{
+  "phone": "9876543210",
+  "address": "Sector 12, ABC Colony, Hyderabad",
+  "label": "A leaking pipe or plumbing issue",
+  "category": "plumber"
+}
