@@ -1,0 +1,14 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+:root {
+  --soft-cream: #FAF7F2;
+  --charcoal-black: #1A1A1A;
+  --muted-gray: #333333;
+  --fresh-green: #5CAC3D;
+  --leaf-green: #4E9530;
+  --pure-white: #FFFFFF;
+  --warm-beige: #EDE8DF;
+}
