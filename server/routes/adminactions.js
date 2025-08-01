@@ -32,6 +32,7 @@ router.post('/accept-technician/:id', async (req, res) => {
       email: technician.mail,
       password: randomPassword,
     });
+    console.log(firebaseUser);
 
     // Send email with credentials
     const mailOptions = {
@@ -41,7 +42,7 @@ router.post('/accept-technician/:id', async (req, res) => {
       text: `Hello ${technician.name},\n\nYou are approved!\n\nLogin Credentials:\nEmail: ${technician.mail}\nPassword: ${randomPassword}\n\nPlease change your password after login.\n\nRegards,\nAdmin Team`,
     };
     await transporter.sendMail(mailOptions);
-
+    console.log("sent mai;");
     // Update technician status and store password
     technician.status = true;
     technician.pass = randomPassword;
@@ -54,7 +55,8 @@ router.post('/accept-technician/:id', async (req, res) => {
       phone: technician.phno,
       name: technician.name,
       role: 'technician',
-      field: technician.field || '', // Assumes 'field' exists in Technician schema
+      field: technician.field || '', 
+      password:randomPassword
     });
     await newUser.save();
 

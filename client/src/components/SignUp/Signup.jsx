@@ -79,12 +79,38 @@ const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
         } else {
           alert(data.error || "Worker registration failed");
         }
-      }
-      if(role==="user"){
-        console.log("Hello");
+      } else {
+        // Register user or admin with Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        const token = await user.getIdToken();
+        
+        // Register user/admin in your backend
+        const res = await fetch("http://localhost:5000/api/users/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+            role: role,
+            uid: user.uid
+          })
+        });
+        
+        const data = await res.json();
+        if (res.ok) {
+          onAuth(token);
+          alert("Registration successful!");
+          onClose();
+          navigate("/dashboard");
+        } else {
+          alert(data.error || "Registration failed");
+        }
       }
     } catch (err) {
-      alert("Signup failed");
+      alert("Signup failed: " + err.message);
       console.error(err);
     }
   };
@@ -128,12 +154,14 @@ const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
           className="auth-input"
           type="email"
           placeholder="Email"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
           className="auth-input"
           type="password"
           placeholder="Password"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
@@ -145,6 +173,7 @@ const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
               type="text"
               placeholder="Name"
               style={{ maxWidth: "100%" }}
+              value={name}
               onChange={e => setName(e.target.value)}
             />
             <input
@@ -152,6 +181,7 @@ const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
               type="text"
               placeholder="Phone Number"
               style={{ maxWidth: "100%" }}
+              value={phno}
               onChange={e => setPhno(e.target.value)}
             />
             <input
@@ -159,6 +189,7 @@ const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
               type="text"
               placeholder="Address"
               style={{ maxWidth: "100%" }}
+              value={address}
               onChange={e => setAddress(e.target.value)}
             />
             <select
@@ -181,6 +212,7 @@ const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
               min="0"
               placeholder="Experience (years)"
               style={{ maxWidth: "100%" }}
+              value={experience}
               onChange={e => setExperience(e.target.value)}
             />
             <input
