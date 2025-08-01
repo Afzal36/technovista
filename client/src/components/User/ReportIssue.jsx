@@ -158,28 +158,6 @@ const ReportIssue = () => {
           )}
         </div>
 
-        {/* Category Selection */}
-        <div className="form-group">
-          <label className="form-label">
-            Issue Category
-            <div className="select-wrapper">
-              <select 
-                value={category} 
-                onChange={(e) => setCategory(e.target.value)}
-                className="category-select"
-                required
-              >
-                <option value="">Select category</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.icon} {cat.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="select-icon" size={20} />
-            </div>
-          </label>
-        </div>
 
        
 
