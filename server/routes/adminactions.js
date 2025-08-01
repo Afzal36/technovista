@@ -10,8 +10,8 @@ const crypto = require('crypto');
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.ADMIN_EMAIL, // your email
-    pass: process.env.ADMIN_EMAIL_PASS, // your email app password
+    user:"buildwithlumora@gmail.com", 
+    pass:"clayzcnmlfbodhkl", // your email app password
   },
 });
 
