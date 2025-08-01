@@ -1,6 +1,7 @@
 POST http://localhost:5000/api/technicians/register
 Content-Type: application/json
 
+{
    {
   "name": "Ravi Kumar",
   "phno": "9876543210",
@@ -10,8 +11,12 @@ Content-Type: application/json
   "field": "Electrician",
   "aadhaarImage": "aadhaar_ravi.jpg",
   "experience": 8
+  }
 }
+
+###
+GET http://localhost:5000/api/technicians/register
 
 
 ###
-GET http://localhost:5000/
+POST http://localhost:5000/api/admin/accept-technician/688cb42de1ebf195107640ae
