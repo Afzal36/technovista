@@ -1,0 +1,17 @@
+POST http://localhost:5000/api/technicians/register
+Content-Type: application/json
+
+   {
+  "name": "Ravi Kumar",
+  "phno": "9876543210",
+  "mail": "ravi.kumar@example.com",
+  "pass": "Ravi@123",
+  "address": "Gulzar Houz, Hyderabad",
+  "field": "Electrician",
+  "aadhaarImage": "aadhaar_ravi.jpg",
+  "experience": 8
+}
+
+
+###
+GET http://localhost:5000/
