@@ -40,9 +40,30 @@ const Signin = ({ onAuth, onClose, onSwitchToSignup }) => {
     try {
       const userCred = await signInWithEmailAndPassword(auth, email, password);
       const token = await userCred.user.getIdToken();
-      await sendTokenToBackend(token);
+      const backendRes = await sendTokenToBackend(token);
+
       onAuth(token);
-      navigate("/dashboard");
+
+      if (backendRes.user && backendRes.user.role === "admin") {
+        localStorage.setItem("role", "admin");
+        navigate("/dashboard");
+      } else if (backendRes.user && backendRes.user.role === "worker") {
+        // Fetch technician status from backend using new route
+        const techRes = await fetch(`http://localhost:5000/api/technicians/byemail?mail=${email}`);
+        const technician = await techRes.json();
+
+        if (technician && technician.status === true) {
+          localStorage.setItem("role", "worker");
+          navigate("/dashboard");
+        } else {
+          localStorage.removeItem("role");
+          alert("Your application has not been approved by the admin yet.");
+          navigate("/");
+        }
+      } else {
+        localStorage.setItem("role", "user");
+        navigate("/dashboard");
+      }
     } catch (err) {
       alert("Login failed");
     }
@@ -54,6 +75,7 @@ const Signin = ({ onAuth, onClose, onSwitchToSignup }) => {
       const token = await result.user.getIdToken();
       await sendTokenToBackend(token);
       onAuth(token);
+      localStorage.setItem("role", "user");
       navigate("/dashboard");
     } catch (err) {
       alert("Google Login failed");

@@ -20,31 +20,70 @@ const GOOGLE_ICON = (
 );
 
 const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
+  const [role, setRole] = useState("user");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("user");
+  // Worker fields
+  const [name, setName] = useState("");
+  const [phno, setPhno] = useState("");
+  const [address, setAddress] = useState("");
+  const [field, setField] = useState("");
+  const [aadharImage, setAadharImage] = useState(null);
+  const [aadharImageBase64, setAadharImageBase64] = useState("");
+  const [experience, setExperience] = useState("");
+
   const navigate = useNavigate();
 
-  const sendTokenToBackend = async (token, selectedRole) => {
-    const res = await fetch("http://localhost:5000/auth", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ role: selectedRole })
-    });
-    const data = await res.json();
-    return data;
+  // Convert image file to base64
+  const handleAadharImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      alert("Image size should be less than 5MB");
+      return;
+    }
+    setAadharImage(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAadharImageBase64(reader.result);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSignup = async () => {
     try {
-      const userCred = await createUserWithEmailAndPassword(auth, email, password);
-      const token = await userCred.user.getIdToken();
-      const data = await sendTokenToBackend(token, role);
-      onAuth(token);
-      if (data.user && data.user.role) {
+      if (role === "worker") {
+        // Register worker in Firebase Auth
+        await createUserWithEmailAndPassword(auth, email, password);
+
+        // Register worker in MongoDB
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("phno", phno);
+        formData.append("mail", email);
+        formData.append("pass", password);
+        formData.append("address", address);
+        formData.append("field", field);
+        formData.append("experience", experience);
+        formData.append("role", "worker");
+        if (aadharImage) formData.append("aadhaarImage", aadharImage);
+
+        const res = await fetch("http://localhost:5000/api/technicians/register", {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert("Registered successfully, you can login once approved by the admin");
+          onClose();
+          navigate("/");
+        } else {
+          alert(data.error || "Worker registration failed");
+        }
+      } else {
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        const token = await userCred.user.getIdToken();
+        onAuth(token);
         navigate("/dashboard");
       }
     } catch (err) {
@@ -57,11 +96,8 @@ const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const token = await result.user.getIdToken();
-      const data = await sendTokenToBackend(token, role);
       onAuth(token);
-      if (data.user && data.user.role) {
-        navigate("/dashboard");
-      }
+      navigate("/dashboard");
     } catch (err) {
       alert("Google signup failed");
       console.error(err);
@@ -73,10 +109,24 @@ const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
       <button className="close-button" onClick={onClose}>×</button>
       <h3>Join Name.</h3>
       <div className="auth-form">
-        <button className="auth-button google" onClick={handleGoogleSignup}>
-          <span style={{ marginRight: 8 }}>{GOOGLE_ICON}</span>
-          Sign up with Google
-        </button>
+        <select
+          className="auth-select"
+          value={role}
+          onChange={e => setRole(e.target.value)}
+        >
+          <option value="user">User</option>
+          <option value="worker">Worker</option>
+          <option value="admin">Admin</option>
+        </select>
+
+        {role === "user" && (
+          <button className="auth-button google" onClick={handleGoogleSignup}>
+            <span style={{ marginRight: 8 }}>{GOOGLE_ICON}</span>
+            Sign up with Google
+          </button>
+        )}
+
+        {/* Common fields */}
         <input
           className="auth-input"
           type="email"
@@ -89,21 +139,69 @@ const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
           placeholder="Password"
           onChange={(e) => setPassword(e.target.value)}
         />
-        <select
-          className="auth-select"
-          value={role}
-          onChange={e => setRole(e.target.value)}
-        >
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-          <option value="worker">Worker</option>
-        </select>
+
+        {/* Worker-specific fields */}
+        {role === "worker" && (
+          <>
+            <input
+              className="auth-input"
+              type="text"
+              placeholder="Name"
+              style={{ maxWidth: "100%" }}
+              onChange={e => setName(e.target.value)}
+            />
+            <input
+              className="auth-input"
+              type="text"
+              placeholder="Phone Number"
+              style={{ maxWidth: "100%" }}
+              onChange={e => setPhno(e.target.value)}
+            />
+            <input
+              className="auth-input"
+              type="text"
+              placeholder="Address"
+              style={{ maxWidth: "100%" }}
+              onChange={e => setAddress(e.target.value)}
+            />
+            <select
+              className="auth-input"
+              style={{ maxWidth: "100%" }}
+              value={field}
+              onChange={e => setField(e.target.value)}
+            >
+              <option value="">Select Field</option>
+              <option value="Electrician">Electrician</option>
+              <option value="Plumber">Plumber</option>
+              <option value="Carpenter">Carpenter</option>
+              <option value="Mason">Mason</option>
+              <option value="Painter">Painter</option>
+              <option value="Other">Other</option>
+            </select>
+            <input
+              className="auth-input"
+              type="number"
+              min="0"
+              placeholder="Experience (years)"
+              style={{ maxWidth: "100%" }}
+              onChange={e => setExperience(e.target.value)}
+            />
+            <input
+              className="auth-input"
+              type="file"
+              accept="image/*"
+              style={{ maxWidth: "100%" }}
+              onChange={handleAadharImageChange}
+            />
+          </>
+        )}
+
         <button className="auth-button email" onClick={handleSignup}>
           Sign up with Email
         </button>
         <div className="auth-links">
-        Already have an account? <a href="#" onClick={e => {e.preventDefault(); onSwitchToSignin();}}>Sign in </a><br/>
-      </div>
+          Already have an account? <a href="#" onClick={e => {e.preventDefault(); onSwitchToSignin();}}>Sign in </a><br/>
+        </div>
       </div>
       <div className="auth-terms">
         Click "Sign up" to agree to Medium's <a href="#">Terms of Service</a> and acknowledge that Medium's <a href="#">Privacy Policy</a> applies to you.

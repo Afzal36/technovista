@@ -7,6 +7,7 @@ import UserDashboard from "./components/User/UserDashboard";
 import AdminDashboard from "./components/Admin/AdminDashboard";
 import WorkerDashboard from "./components/Worker/WorkerDashboard";
 import Home from "./components/Home/Home";
+import ReportIssue from "./components/User/ReportIssue";
 
 const getDashboardComponent = (role) => {
   switch (role) {
@@ -111,6 +112,14 @@ const App = () => {
               <button onClick={handleLogout}>Logout</button>
             </ProtectedRoute>
           }
+        />
+        <Route 
+          path="/report-issue" 
+          element={
+            <ProtectedRoute isAuth={isAuth}>
+              <ReportIssue />
+            </ProtectedRoute>
+          } 
         />
         <Route path="*" element={<Navigate to={isAuth ? "/dashboard" : "/"} />} />
       </Routes>

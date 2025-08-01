@@ -9,7 +9,7 @@ const technicianSchema = new mongoose.Schema({
   phno: {
     type: String,
     required: true,
-    match: /^[6-9]\d{9}$/, // Indian phone number validation
+    match: /^[6-9]\d{9}$/,
     unique: true,
   },
   mail: {
@@ -41,9 +41,10 @@ const technicianSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
+  role: { type: String },
   status: {
     type: Boolean,
-    default: false // 👈 Set to false by default
+    default: false 
   },
   createdAt: {
     type: Date,
