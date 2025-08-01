@@ -19,4 +19,4 @@ GET http://localhost:5000/api/technicians/register
 
 
 ###
-POST http://localhost:5000/api/admin/accept-technician/688cb42de1ebf195107640ae
+POST http://localhost:5000/api/admin/accept-technician/688ce46af933c376c0506587
