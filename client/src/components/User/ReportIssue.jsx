@@ -1,24 +1,18 @@
 import { useState, useRef } from 'react';
-import { Upload, ChevronDown, Check, X, Camera, Loader } from 'lucide-react';
+import { Upload, Check, X, Camera, Loader } from 'lucide-react';
 import './ReportIssue.css';
 
 const ReportIssue = () => {
   const [dragActive, setDragActive] = useState(false);
   const [image, setImage] = useState(null);
-  const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [urgency, setUrgency] = useState('medium');
+  const [showSuccess, setShowSuccess] = useState(false);
   const fileInputRef = useRef(null);
 
-  const categories = [
-    { id: 'plumbing', label: 'Plumbing', icon: '🚰' },
-    { id: 'electrical', label: 'Electrical', icon: '⚡' },
-    { id: 'civil', label: 'Civil/Structural', icon: '🏗️' },
-    { id: 'hvac', label: 'HVAC', icon: '❄️' },
-    { id: 'security', label: 'Security', icon: '🔒' },
-    { id: 'other', label: 'Other', icon: '🔧' }
-  ];
+  // Add your Gemini API key here
+  const GEMINI_API_KEY = 'AIzaSyDCabvlNbcX-hN7qzGz4TI2PQCq2a0hwyc';
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -63,6 +57,71 @@ const ReportIssue = () => {
     fileInputRef.current.click();
   };
 
+  // Function to send data to Gemini API
+  const sendToGemini = async (backendResponse) => {
+    try {
+      const prompt = `
+        Based on the following maintenance issue analysis, please generate a JSON object that matches this exact schema:
+        
+        {
+          "phone": "string (Indian phone number format: 10 digits starting with 6-9)",
+          "address": "string (generate a realistic Indian address)",
+          "label": "string (use the predicted_label from the analysis)",
+          "category": "string (determine appropriate category like 'plumber', 'electrician', 'cleaner', 'painter', 'carpenter', etc.)"
+        }
+
+        Analysis data:
+        ${JSON.stringify(backendResponse, null, 2)}
+
+        Important:
+        - Use the predicted_label directly from the analysis
+        - Generate a realistic Indian phone number (10 digits, starting with 6-9)
+        - Create a believable Indian address
+        - Choose the most appropriate category based on the issue type
+        - Return ONLY the JSON object, no additional text
+      `;
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gemini API error: ${response.status}`);
+      }
+
+      const geminiData = await response.json();
+      const generatedText = geminiData.candidates[0].content.parts[0].text;
+      
+      // Try to parse the JSON from Gemini response
+      try {
+        const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const structuredData = JSON.parse(jsonMatch[0]);
+          console.log('Structured Issue Report:', structuredData);
+          return structuredData;
+        } else {
+          console.error('No JSON found in Gemini response:', generatedText);
+        }
+      } catch (parseError) {
+        console.error('Error parsing Gemini JSON:', parseError);
+        console.log('Raw Gemini response:', generatedText);
+      }
+
+    } catch (error) {
+      console.error('Error calling Gemini API:', error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -73,7 +132,6 @@ const ReportIssue = () => {
     if (fileInputRef.current && fileInputRef.current.files[0]) {
       formData.append('image', fileInputRef.current.files[0]);
     }
-    formData.append('category', category);
     formData.append('urgency', urgency);
     if (description.trim()) {
       formData.append('description', description);
@@ -90,13 +148,38 @@ const ReportIssue = () => {
 
       // Show success animation and reset form if successful
       if (response.ok) {
-        setImage(null);
-        setCategory('');
-        setDescription('');
-        setUrgency('medium');
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
+        // Send to Gemini API for structured data generation
+        const structuredData = await sendToGemini(data);
+        if (structuredData) {
+          try {
+            const postRes = await fetch('http://localhost:5000/api/issues/minimal-report', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(structuredData),
+            });
+            if (!postRes.ok) {
+              const postErr = await postRes.text();
+              console.error('Error posting minimal report:', postErr);
+            } else {
+              console.log('Minimal report posted successfully');
+            }
+          } catch (err) {
+            console.error('Network error posting minimal report:', err);
+          }
         }
+        setShowSuccess(true); // Show success animation
+        setTimeout(() => {
+          setShowSuccess(false);
+          // Reset form
+          setImage(null);
+          setDescription('');
+          setUrgency('medium');
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+        }, 2000); // Hide success after 2 seconds
       } else {
         console.error('Server Error:', data);
       }
@@ -158,31 +241,6 @@ const ReportIssue = () => {
           )}
         </div>
 
-        {/* Category Selection */}
-        <div className="form-group">
-          <label className="form-label">
-            Issue Category
-            <div className="select-wrapper">
-              <select 
-                value={category} 
-                onChange={(e) => setCategory(e.target.value)}
-                className="category-select"
-                required
-              >
-                <option value="">Select category</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.icon} {cat.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="select-icon" size={20} />
-            </div>
-          </label>
-        </div>
-
-       
-
         {/* Description */}
         <div className="form-group">
           <label className="form-label">
@@ -201,7 +259,7 @@ const ReportIssue = () => {
         <button 
           type="submit" 
           className={`submit-btn ${loading ? 'loading' : ''}`}
-          disabled={loading || !image || !category}
+          disabled={loading || !image}
         >
           {loading ? (
             <>
@@ -216,6 +274,18 @@ const ReportIssue = () => {
           )}
         </button>
       </form>
+
+      {showSuccess && (
+        <div className="success-overlay">
+          <div className="success-popup">
+            <div className="success-icon">
+              <Check size={40} />
+            </div>
+            <h3>Successfully Submitted!</h3>
+            <p>Your maintenance request has been received.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
