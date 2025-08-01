@@ -1,33 +1,21 @@
-// routes/minimalReport.js
+// routes/issueReports.js
 const express = require('express');
 const router = express.Router();
 const MinimalIssueReport = require('../models/MinimalIssueReport');
 
-// GET /api/issues/minimal-report
-router.get('/minimal-report', async (req, res) => {
-  try {
-    const reports = await MinimalIssueReport.find().sort({ reportedAt: -1 });
-    res.json(reports);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch reports', details: err.message });
-  }
-});
-
-
+// POST /api/issues/minimal-report
 router.post('/minimal-report', async (req, res) => {
   try {
     const {
-      email,
       phone,
       address,
       label,
       category,
-      assignedTo = null, // Optional in request
-      status = false     // Optional in request
+      assignedTo = null,
+      status = false
     } = req.body;
 
     const report = new MinimalIssueReport({
-      email,
       phone,
       address,
       label,
@@ -43,7 +31,7 @@ router.post('/minimal-report', async (req, res) => {
   }
 });
 
-// GET all reports
+// GET /api/issues/minimal-report
 router.get('/minimal-report', async (req, res) => {
   try {
     const reports = await MinimalIssueReport.find().sort({ reportedAt: -1 });
@@ -53,19 +41,24 @@ router.get('/minimal-report', async (req, res) => {
   }
 });
 
-// Accept/update a report
-router.patch('/minimal-report/:id', async (req, res) => {
+// POST /api/issues/assigned - Fetch all issues assigned to a person
+router.post('/assigned', async (req, res) => {
   try {
-    const { status, assignedTo } = req.body;
-    const report = await MinimalIssueReport.findByIdAndUpdate(
-      req.params.id,
-      { status, assignedTo },
-      { new: true }
-    );
-    if (!report) return res.status(404).json({ error: "Report not found" });
-    res.json(report);
+    const { assignedTo } = req.body;
+
+    if (!assignedTo) {
+      return res.status(400).json({ error: 'assignedTo is required' });
+    }
+
+    const reports = await MinimalIssueReport.find({ assignedTo });
+
+    if (reports.length === 0) {
+      return res.status(404).json({ message: 'No reports found for this technician' });
+    }
+
+    res.json(reports);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to update report', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch reports', details: err.message });
   }
 });
 

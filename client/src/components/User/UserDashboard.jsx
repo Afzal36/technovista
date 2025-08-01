@@ -1,76 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Search, Plus, AlertTriangle, LogOut } from 'lucide-react';
+import { Users, Search, Plus, AlertTriangle, LogOut, FileText } from 'lucide-react';
 import './UserDashBoard.css';
 
 const UserDashBoard = () => {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('my-communities');
+  const [myReports, setMyReports] = useState([]);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   // Static data for My Communities
   const myCommunities = [
-    { 
-      id: 1, 
-      name: 'Downtown Office Complex', 
-      members: 45, 
-      issues: 3, 
-      resolved: 28,
-      icon: ' '
-    },
-    { 
-      id: 2, 
-      name: 'VNR hostels', 
-      members: 800, 
-      issues: 1, 
-      resolved: 15,
-      icon: ' '
-    },
-    { 
-      id: 3, 
-      name: 'Industrial Park West', 
-      members: 67, 
-      issues: 5, 
-      resolved: 42,
-      icon: ' '
-    },
-    { 
-      id: 4, 
-      name: 'Shopping Center Plaza', 
-      members: 89, 
-      issues: 2, 
-      resolved: 56,
-      icon: ' '
-    }
+    { id: 1, name: 'Downtown Office Complex', members: 45, issues: 3, resolved: 28, icon: '🏢' },
+    { id: 2, name: 'VNR hostels', members: 800, issues: 1, resolved: 15, icon: '🏠' },
+    { id: 3, name: 'Industrial Park West', members: 67, issues: 5, resolved: 42, icon: '🏭' },
+    { id: 4, name: 'Shopping Center Plaza', members: 89, issues: 2, resolved: 56, icon: '🏬' }
   ];
 
   // Static data for Explore Communities
   const exploreCommunities = [
-
-    {
-      id: 2,
-      name: 'Green Valley Apartments',
-      description: 'Eco-friendly residential community focused on sustainable maintenance practices and green living solutions.',
-      members: 78,
-      icon: '🌱',
-      rating: 4.6
-    },
-    {
-      id: 3,
-      name: 'Harbor Industrial District',
-      description: 'Large-scale industrial facilities with comprehensive equipment monitoring and predictive maintenance systems.',
-      members: 234,
-      icon: '⚙️',
-      rating: 4.9
-    },
-    {
-      id: 4,
-      name: 'City Center Mall',
-      description: 'Retail complex with integrated maintenance management for all tenant spaces and common areas.',
-      members: 123,
-      icon: '🏬',
-      rating: 4.7
-    }
+    { id: 2, name: 'Green Valley Apartments', description: 'Eco-friendly residential community focused on sustainable maintenance practices and green living solutions.', members: 78, icon: '🌱', rating: 4.6 },
+    { id: 3, name: 'Harbor Industrial District', description: 'Large-scale industrial facilities with comprehensive equipment monitoring and predictive maintenance systems.', members: 234, icon: '⚙️', rating: 4.9 },
+    { id: 4, name: 'City Center Mall', description: 'Retail complex with integrated maintenance management for all tenant spaces and common areas.', members: 123, icon: '🏬', rating: 4.7 }
   ];
+
+  // Fetch reports reported by the logged-in user
+  useEffect(() => {
+    if (!user || !user.phone) return;
+    fetch("http://localhost:5000/api/issues/minimal-report")
+      .then(res => res.json())
+      .then(data => {
+        // Filter reports by phone number
+        const filtered = data.filter(report => report.phone === user.phone);
+        setMyReports(filtered);
+      });
+  }, [user]);
 
   const handleLeave = (communityId) => {
     console.log(`Leaving community ${communityId}`);
@@ -104,9 +68,7 @@ const UserDashBoard = () => {
             <li>
               <button
                 onClick={() => handleSectionChange('my-communities')}
-                className={`nav-item ${
-                  activeSection === 'my-communities' ? 'active' : ''
-                }`}
+                className={`nav-item ${activeSection === 'my-communities' ? 'active' : ''}`}
               >
                 <Users className="nav-icon" />
                 <span>My Communities</span>
@@ -115,12 +77,19 @@ const UserDashBoard = () => {
             <li>
               <button
                 onClick={() => handleSectionChange('explore-communities')}
-                className={`nav-item ${
-                  activeSection === 'explore-communities' ? 'active' : ''
-                }`}
+                className={`nav-item ${activeSection === 'explore-communities' ? 'active' : ''}`}
               >
                 <Search className="nav-icon" />
                 <span>Explore Communities</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => handleSectionChange('my-reports')}
+                className={`nav-item ${activeSection === 'my-reports' ? 'active' : ''}`}
+              >
+                <FileText className="nav-icon" />
+                <span>My Reports</span>
               </button>
             </li>
           </ul>
@@ -133,13 +102,18 @@ const UserDashBoard = () => {
           {/* Header */}
           <div className="content-header">
             <h2 className="content-title">
-              {activeSection === 'my-communities' ? 'My Communities' : 'Explore Communities'}
+              {activeSection === 'my-communities'
+                ? 'My Communities'
+                : activeSection === 'explore-communities'
+                ? 'Explore Communities'
+                : 'My Reports'}
             </h2>
             <p className="content-description">
-              {activeSection === 'my-communities' 
+              {activeSection === 'my-communities'
                 ? 'Manage your active community memberships and report maintenance issues'
-                : 'Discover and join new maintenance communities in your area'
-              }
+                : activeSection === 'explore-communities'
+                ? 'Discover and join new maintenance communities in your area'
+                : 'View all maintenance reports you have submitted'}
             </p>
           </div>
 
@@ -152,13 +126,11 @@ const UserDashBoard = () => {
                     <div className="community-card-image">
                       <div className="community-card-icon">{community.icon}</div>
                     </div>
-                    
                     <div className="community-card-body">
                       <div className="card-header">
                         <h3 className="card-title">{community.name}</h3>
                         <p className="card-member-count">{community.members} members</p>
                       </div>
-
                       <div className="card-stats">
                         <div className="card-stat">
                           <p className="card-stat-value">{community.issues}</p>
@@ -173,7 +145,6 @@ const UserDashBoard = () => {
                           <p className="card-stat-label">Success Rate</p>
                         </div>
                       </div>
-
                       <div className="card-actions">
                         <button
                           onClick={() => handleReportIssue(community.id)}
@@ -182,7 +153,6 @@ const UserDashBoard = () => {
                           <AlertTriangle className="button-icon" />
                           Report Issue
                         </button>
-                        
                         <button
                           onClick={() => handleLeave(community.id)}
                           className="leave-button"
@@ -202,14 +172,12 @@ const UserDashBoard = () => {
                 {exploreCommunities.map((community) => (
                   <div key={community.id} className="explore-card">
                     <div className="card-image">
-                      🏢
+                      {community.icon}
                     </div>
-                    
                     <div className="card-content">
                       <h3 className="explore-card-title">{community.name}</h3>
                       <p className="card-description">{community.description}</p>
                       <p className="card-member-info">{community.members} members</p>
-                      
                       <button
                         onClick={() => handleJoinCommunity(community.id)}
                         className="join-button"
@@ -222,11 +190,32 @@ const UserDashBoard = () => {
                 ))}
               </div>
             )}
+
+            {activeSection === 'my-reports' && (
+              <div className="my-reports-list">
+                {myReports.length === 0 ? (
+                  <div className="no-reports-msg">No reports submitted by you yet.</div>
+                ) : (
+                  myReports.map((report) => (
+                    <div key={report._id} className="my-report-card">
+                      <div className="my-report-label">{report.label}</div>
+                      <div className="my-report-info">
+                        <span><strong>Category:</strong> {report.category}</span>
+                        <span><strong>Address:</strong> {report.address}</span>
+                        <span><strong>Status:</strong> {report.status}</span>
+                        <span><strong>Assigned To:</strong> {report.assignedTo || "Unassigned"}</span>
+                        <span><strong>Reported At:</strong> {new Date(report.reportedAt).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
-  );
+    );
 };
 
 export default UserDashBoard;

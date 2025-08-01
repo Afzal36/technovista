@@ -29,8 +29,9 @@ const minimalIssueSchema = new mongoose.Schema({
     default: null // e.g., name or ID of technician
   },
   status: {
-    type: Boolean,
-    default: false // false = unresolved, true = resolved
+    type: String,
+    enum: ['none', 'progress', 'resolved'],
+    default: 'none'
   },
   reportedAt: {
     type: Date,
