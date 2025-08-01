@@ -1,30 +1,78 @@
 const express = require("express");
-const admin = require("firebase-admin");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET || "yoursecretkey";
 
-router.post("/auth", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
-
+// SIGNUP (user, admin, worker)
+router.post("/signup", async (req, res) => {
   try {
-    const decoded = await admin.auth().verifyIdToken(token);
-    const { uid, email, phone_number: phone, name } = decoded;
-    const { role } = req.body;
+    const {
+      email, password, name, phone, role = "user",
+      address, field, aadhaarImage, experience
+    } = req.body;
 
-    let user = await User.findOne({ uid });
-    if (!user) {
-      user = await User.create({ uid, email, phone, name, role });
-    } else if (role && user.role !== role) {
-      user.role = role;
-      await user.save();
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    // For user/admin, password is required
+    if ((role === "user" || role === "admin") && !password)
+      return res.status(400).json({ error: "Password is required" });
+
+    const existing = await User.findOne({ email });
+    if (existing) return res.status(409).json({ error: "User already exists" });
+
+    let hashed = "";
+    if (role === "user" || role === "admin") {
+      hashed = await bcrypt.hash(password, 10);
     }
 
-    res.status(200).json({ user });
+    let userData = {
+      email,
+      password: role === "worker" ? "" : hashed,
+      name,
+      phone,
+      role,
+      address,
+      field,
+      aadhaarImage,
+      experience,
+      status: role === "worker" ? false : undefined
+    };
+
+    // Remove undefined fields
+    Object.keys(userData).forEach(key => userData[key] === undefined && delete userData[key]);
+
+    const user = await User.create(userData);
+
+    res.status(201).json({ message: "User registered", user: { email: user.email, role: user.role } });
   } catch (err) {
-    res.status(401).json({ error: "Invalid token" });
+    res.status(500).json({ error: err.message });
   }
+});
+
+// LOGIN (user, admin, worker)
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  let user = await User.findOne({ email });
+  if (user) {
+    // For workers, password is only set after admin approval
+    if (user.role === "worker" && !user.status) {
+      return res.status(403).json({ error: "Worker not approved yet" });
+    }
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(401).json({ error: "Invalid credentials" });
+    const token = jwt.sign({ id: user._id, role: user.role, email: user.email }, JWT_SECRET, { expiresIn: "1d" });
+
+    // For workers, return status
+    if (user.role === "worker") {
+      return res.json({ token, role: user.role, status: user.status, user: { email: user.email, role: user.role, name: user.name } });
+    }
+
+    return res.json({ token, role: user.role, user: { email: user.email, role: user.role, name: user.name } });
+  }
+  return res.status(404).json({ error: "User not found" });
 });
 
 module.exports = router;

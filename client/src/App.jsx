@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import 'bootstrap/dist/css/bootstrap.min.css';
 import Signup from "./components/SignUp/Signup";
 import Signin from "./components/Signin/Signin";
 import UserDashboard from "./components/User/UserDashboard";
@@ -32,24 +31,11 @@ const App = () => {
   const [showSignup, setShowSignup] = useState(false);
 
   const handleAuth = (token) => {
-    fetch("http://localhost:5000/auth", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.user && data.user.role) {
-          localStorage.setItem("token", token);
-          localStorage.setItem("role", data.user.role);
-          setIsAuth(true);
-          setUserRole(data.user.role);
-          setShowSignin(false);
-          setShowSignup(false);
-        }
-      });
+    // decode token if needed, or just set isAuth and userRole from localStorage
+    setIsAuth(true);
+    setUserRole(localStorage.getItem("role"));
+    setShowSignin(false);
+    setShowSignup(false);
   };
 
   const handleLogout = () => {
@@ -59,7 +45,6 @@ const App = () => {
     setUserRole("");
   };
 
-  // Modal overlay click handler
   const handleOverlayClick = (e) => {
     if (e.target.classList.contains("auth-container")) {
       setShowSignin(false);
@@ -88,6 +73,7 @@ const App = () => {
                   setShowSignup(true);
                 }}
               />
+<<<<<<< HEAD
             </div>
           )}
           {showSignup && (
@@ -134,6 +120,55 @@ const App = () => {
   </Routes>
 </Router>
 
+=======
+              {showSignin && (
+                <div className="auth-container" onClick={handleOverlayClick}>
+                  <Signin
+                    onAuth={handleAuth}
+                    onClose={() => setShowSignin(false)}
+                    onSwitchToSignup={() => {
+                      setShowSignin(false);
+                      setShowSignup(true);
+                    }}
+                  />
+                </div>
+              )}
+              {showSignup && (
+                <div className="auth-container" onClick={handleOverlayClick}>
+                  <Signup
+                    onAuth={handleAuth}
+                    onClose={() => setShowSignup(false)}
+                    onSwitchToSignin={() => {
+                      setShowSignin(true);
+                      setShowSignup(false);
+                    }}
+                  />
+                </div>
+              )}
+            </>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute isAuth={isAuth}>
+              {getDashboardComponent(userRole)}
+              <button onClick={handleLogout}>Logout</button>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/report-issue"
+          element={
+            <ProtectedRoute isAuth={isAuth}>
+              <ReportIssue />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to={isAuth ? "/dashboard" : "/"} />} />
+      </Routes>
+    </Router>
+>>>>>>> 59c4d4bc99c7370dd12ba84142460741d6503aa5
   );
 };
 
