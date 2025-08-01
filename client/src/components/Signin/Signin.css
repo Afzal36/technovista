@@ -20,6 +20,24 @@
   max-width: 480px;
   box-shadow: 0 20px 40px rgba(26, 26, 26, 0.15);
   position: relative;
+   max-height: 90vh;
+  overflow-y: auto;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #E6E6E6 #fff; /* Firefox */
+}
+
+/* Chrome, Edge, Safari */
+.auth-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.auth-modal::-webkit-scrollbar-thumb {
+  background: #E6E6E6;
+  border-radius: 4px;
+}
+
+.auth-modal::-webkit-scrollbar-track {
+  background: #fff;
 }
 
 .auth-modal h3 {
