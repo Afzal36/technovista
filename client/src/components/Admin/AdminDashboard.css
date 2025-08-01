@@ -1,0 +1,100 @@
+:root {
+  --soft-cream: #FAF7F2;
+  --charcoal-black: #1A1A1A;
+  --muted-gray: #333333;
+  --fresh-green: #5CAC3D;
+  --leaf-green: #4E9530;
+  --pure-white: #FFFFFF;
+  --warm-beige: #EDE8DF;
+}
+
+.admin-tech-container {
+  background: var(--soft-cream);
+  padding: 32px;
+  border-radius: 12px;
+  max-width: 1100px;
+  margin: 32px auto;
+  box-shadow: 0 8px 32px rgba(26,26,26,0.08);
+}
+
+.admin-tech-title {
+  color: var(--charcoal-black);
+  margin-bottom: 24px;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.admin-tech-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--pure-white);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.admin-tech-table th,
+.admin-tech-table td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--warm-beige);
+}
+
+.admin-tech-table th {
+  background: var(--warm-beige);
+  color: var(--muted-gray);
+  font-weight: 500;
+}
+
+.admin-tech-status {
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.admin-tech-status.accepted {
+  background: var(--fresh-green);
+  color: var(--pure-white);
+}
+
+.admin-tech-status.pending {
+  background: var(--muted-gray);
+  color: var(--pure-white);
+}
+
+.admin-tech-btn {
+  padding: 6px 16px;
+  margin-right: 8px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.admin-tech-btn.accept {
+  background: var(--fresh-green);
+  color: var(--pure-white);
+}
+
+.admin-tech-btn.decline {
+  background: var(--muted-gray);
+  color: var(--pure-white);
+}
+
+.admin-tech-btn.accept:hover {
+  background: var(--leaf-green);
+}
+
+.admin-tech-btn.decline:hover {
+  background: #c0392b;
+}
+
+.admin-tech-loading,
+.admin-tech-empty {
+  color: var(--muted-gray);
+  font-size: 1.1rem;
+  margin: 32px 0;
+  text-align: center;
+}

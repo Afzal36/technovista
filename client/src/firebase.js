@@ -16,10 +16,7 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
-<<<<<<< HEAD
-=======
 console.log(firebaseConfig);
->>>>>>> 16655405ad37ad864a51ea7ea7804d392d795fff
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
@@ -38,8 +35,4 @@ export const createRecaptcha = () => {
 };
 
 // Phone sign-in function
-<<<<<<< HEAD
 export const phoneSignIn = signInWithPhoneNumber;
-=======
-export const phoneSignIn = signInWithPhoneNumber;
->>>>>>> 16655405ad37ad864a51ea7ea7804d392d795fff

@@ -2,22 +2,29 @@ const express = require('express');
 const router = express.Router();
 const Technician = require('../models/Technician');
 
-// POST /api/technicians/register - Bulk insert technicians
-router.post('/register', async (req, res) => {
+const multer = require('multer');
+const upload = multer({ limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB limit
+
+router.post('/register', upload.single('aadhaarImage'), async (req, res) => {
   try {
     const tech = req.body;
+    let aadhaarImage = "";
+    if (req.file) {
+      aadhaarImage = req.file.buffer.toString('base64'); // Store as base64 if needed
+    } else if (tech.aadhaarImage) {
+      aadhaarImage = tech.aadhaarImage;
+    }
 
-    // Build technician object with defaults
     const technician = {
-      name: tech.name || 'Technician 1',
-      address: tech.address || `${tech.area || 'Unknown'} Lane, Hyderabad`,
-      phno: tech.phno || tech.phone,
-      mail: tech.mail || 'tech1@example.com',
-      pass: tech.pass || 'Dummy@123',
-      field: tech.field || tech.category,
-      aadhaarImage: tech.aadhaarImage || 'aadhaar_1.jpg',
+      name: tech.name,
+      address: tech.address,
+      phno: tech.phno,
+      mail: tech.mail,
+      pass: tech.pass,
+      field: tech.field,
+      aadhaarImage,
       experience: parseInt(tech.experience) || 0,
-      // status will default to false
+      role: tech.role || 'worker',
     };
 
     const inserted = await Technician.create(technician);
@@ -37,6 +44,44 @@ router.get('/', async (req, res) => {
   try {
     const technicians = await Technician.find();
     res.status(200).json(technicians);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.patch('/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    const tech = await Technician.findByIdAndUpdate(
+      req.params.id,
+      { status: !!status },
+      { new: true }
+    );
+    if (!tech) return res.status(404).json({ error: "Technician not found" });
+    res.json({ message: "Status updated", technician: tech });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Optionally, add DELETE route for declining
+router.delete('/:id', async (req, res) => {
+  try {
+    await Technician.findByIdAndDelete(req.params.id);
+    res.json({ message: "Technician request declined and deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+router.get('/byemail', async (req, res) => {
+  try {
+    const { mail } = req.query;
+    if (!mail) return res.status(400).json({ error: "Email required" });
+    const technician = await Technician.findOne({ mail: mail.toLowerCase() });
+    if (!technician) return res.status(404).json({ error: "Technician not found" });
+    res.status(200).json(technician);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
