@@ -5,7 +5,7 @@ const minimalIssueSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
-    match: /^[6-9]\d{9}$/  // Indian phone number validation
+    match: /^[6-9]\d{9}$/
   },
   address: {
     type: String,
@@ -17,7 +17,15 @@ const minimalIssueSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    required: true // e.g., plumber, electrician
+    required: true
+  },
+  assignedTo: {
+    type: String,
+    default: null // e.g., name or ID of technician
+  },
+  status: {
+    type: Boolean,
+    default: false // false = unresolved, true = resolved
   },
   reportedAt: {
     type: Date,

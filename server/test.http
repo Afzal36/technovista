@@ -53,7 +53,8 @@ Content-Type: application/json
   "phone": "9876543210",
   "address": "Sector 12, ABC Colony, Hyderabad",
   "label": "A leaking pipe or plumbing issue",
-  "category": "plumber"
+  "category": "plumber",
+  "assignedTo": "Technician A"
 }
 
 ###
