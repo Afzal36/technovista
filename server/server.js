@@ -4,6 +4,8 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const admin = require("firebase-admin");
 const imageClassifierRoute = require("./routes/imageClassifier");
+const userRoutes = require("./routes/userRoutes"); // renamed from authRoute
+
 
 
 
@@ -42,3 +44,4 @@ app.use("/api/technicians", technicianRoutes);
 app.use("/", authRoute);
 app.use('/api/admin', adminActions);
 app.use("/api/image", imageClassifierRoute);
+app.use("/api/users", userRoutes);
