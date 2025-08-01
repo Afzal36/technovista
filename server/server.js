@@ -3,6 +3,9 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const admin = require("firebase-admin");
+const imageClassifierRoute = require("./routes/imageClassifier");
+
+
 
 const adminActions = require('./routes/adminactions');
 const technicianRoutes = require("./routes/technicianRoutes");
@@ -17,7 +20,9 @@ app.use(cors());
 app.use(express.json());
 
 // Firebase Admin SDK Initialization
+//const admin = require("firebase-admin");
 const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
@@ -36,3 +41,4 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
 app.use("/api/technicians", technicianRoutes);
 app.use("/", authRoute);
 app.use('/api/admin', adminActions);
+app.use("/api/image", imageClassifierRoute);
