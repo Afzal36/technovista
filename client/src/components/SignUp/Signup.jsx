@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// ...existing imports...
 const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
   const [role, setRole] = useState("user");
   const [email, setEmail] = useState("");
@@ -28,16 +27,17 @@ const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
     try {
       const body = {
         email,
-        password,
         name,
         phone,
         role,
-        ...(role === "worker" && {
-          address,
-          field,
-          aadhaarImage: aadharImage,
-          experience
-        })
+        ...(role === "worker"
+          ? {
+              address,
+              field,
+              aadhaarImage: aadharImage,
+              experience,
+            }
+          : { password })
       };
       const res = await fetch("http://localhost:5000/api/auth/signup", {
         method: "POST",
@@ -68,7 +68,10 @@ const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
           <option value="admin">Admin</option>
         </select>
         <input className="auth-input" type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-        <input className="auth-input" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
+        {/* Only show password for user/admin */}
+        {(role === "user" || role === "admin") && (
+          <input className="auth-input" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
+        )}
         <input className="auth-input" type="text" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
         <input className="auth-input" type="text" placeholder="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} />
         {role === "worker" && (

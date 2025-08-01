@@ -14,17 +14,23 @@ router.post("/signup", async (req, res) => {
       address, field, aadhaarImage, experience
     } = req.body;
 
-    if (!email || !password) return res.status(400).json({ error: "Email and password required" });
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    // For user/admin, password is required
+    if ((role === "user" || role === "admin") && !password)
+      return res.status(400).json({ error: "Password is required" });
 
     const existing = await User.findOne({ email });
     if (existing) return res.status(409).json({ error: "User already exists" });
 
-    const hashed = await bcrypt.hash(password, 10);
+    let hashed = "";
+    if (role === "user" || role === "admin") {
+      hashed = await bcrypt.hash(password, 10);
+    }
 
-    // If worker, require extra fields
     let userData = {
       email,
-      password: hashed,
+      password: role === "worker" ? "" : hashed,
       name,
       phone,
       role,
@@ -51,6 +57,10 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   let user = await User.findOne({ email });
   if (user) {
+    // For workers, password is only set after admin approval
+    if (user.role === "worker" && !user.status) {
+      return res.status(403).json({ error: "Worker not approved yet" });
+    }
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ error: "Invalid credentials" });
     const token = jwt.sign({ id: user._id, role: user.role, email: user.email }, JWT_SECRET, { expiresIn: "1d" });

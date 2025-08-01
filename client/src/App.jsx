@@ -7,6 +7,7 @@ import AdminDashboard from "./components/Admin/AdminDashboard";
 import WorkerDashboard from "./components/Worker/WorkerDashboard";
 import Home from "./components/Home/Home";
 import ReportIssue from "./components/User/ReportIssue";
+import SubscriptionPlans from "./components/Admin/AdminPaymentPage";
 
 const getDashboardComponent = (role) => {
   switch (role) {
@@ -30,7 +31,6 @@ const App = () => {
   const [showSignup, setShowSignup] = useState(false);
 
   const handleAuth = (token) => {
-    // decode token if needed, or just set isAuth and userRole from localStorage
     setIsAuth(true);
     setUserRole(localStorage.getItem("role"));
     setShowSignin(false);
@@ -105,6 +105,10 @@ const App = () => {
               <ReportIssue />
             </ProtectedRoute>
           }
+        />
+        <Route
+          path="/sub"
+          element={<SubscriptionPlans />}
         />
         <Route path="*" element={<Navigate to={isAuth ? "/dashboard" : "/"} />} />
       </Routes>
