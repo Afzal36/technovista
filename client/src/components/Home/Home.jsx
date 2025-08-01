@@ -49,16 +49,16 @@ const Home = ({ onSigninClick, onSignupClick }) => {
           </div>
           <div className="statsRow">
             <div className="stat">
-              <span className="statNumber">85%</span>
-              <span className="statLabel">Faster Response</span>
+              
+              <span className="statLabel">Faster</span>
             </div>
             <div className="stat">
-              <span className="statNumber">92%</span>
-              <span className="statLabel">Accuracy Rate</span>
+
+              <span className="statLabel">Accurate</span>
             </div>
             <div className="stat">
-              <span className="statNumber">500+</span>
-              <span className="statLabel">Institutions</span>
+            
+              <span className="statLabel">Institutional</span>
             </div>
           </div>
         </div>
@@ -74,96 +74,30 @@ const Home = ({ onSigninClick, onSignupClick }) => {
 
       {/* Features Section */}
       <section id="features" className="features">
-        <div className="sectionContainer">
-          <div className="sectionHeader">
-            <h2 className="sectionTitle">Why Choose MaintenanceAI?</h2>
-            <p className="sectionSubtitle">
-              Transform your maintenance operations with cutting-edge AI technology
-            </p>
-          </div>
-          
-          <div className="featuresGrid">
-            <div className="featureCard">
-              <div className="featureCardIcon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 12l2 2 4-4"/>
-                  <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1h9l4 4-4 4H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1h18c.552 0 1-.448 1-1v-6c0-.552-.448-1-1-1h-9l-4-4 4-4h9z"/>
-                </svg>
-              </div>
-              <h3 className="featureCardTitle">Smart Issue Detection</h3>
-              <p className="featureCardDesc">
-                Advanced computer vision analyzes uploaded images to identify maintenance issues with 92% accuracy.
-              </p>
-            </div>
-
-            <div className="featureCard">
-              <div className="featureCardIcon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="m22 21-3-3m0 0-3-3m3 3h-6"/>
-                </svg>
-              </div>
-              <h3 className="featureCardTitle">Instant Technician Routing</h3>
-              <p className="featureCardDesc">
-                Automatically dispatch the right specialist based on issue type, location, and technician availability.
-              </p>
-            </div>
-
-            <div className="featureCard">
-              <div className="featureCardIcon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 3h18v18H3zM9 9h6v6H9z"/>
-                  <path d="M9 1v6M20 9h3M15 20v3M1 15h6"/>
-                </svg>
-              </div>
-              <h3 className="featureCardTitle">Real-time Tracking</h3>
-              <p className="featureCardDesc">
-                Monitor progress from issue submission to resolution with live updates and status notifications.
-              </p>
-            </div>
-
-            <div className="featureCard">
-              <div className="featureCardIcon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2v6l3-3M6 18l3-3v6M18 6l-3 3h6M6 6h6L9 9"/>
-                </svg>
-              </div>
-              <h3 className="featureCardTitle">Analytics Dashboard</h3>
-              <p className="featureCardDesc">
-                Comprehensive insights into maintenance trends, response times, and operational efficiency.
-              </p>
-            </div>
-
-            <div className="featureCard">
-              <div className="featureCardIcon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  <path d="m9 12 2 2 4-4"/>
-                </svg>
-              </div>
-              <h3 className="featureCardTitle">Enterprise Security</h3>
-              <p className="featureCardDesc">
-                Bank-level encryption and compliance with institutional security standards and regulations.
-              </p>
-            </div>
-
-            <div className="featureCard">
-              <div className="featureCardIcon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-                  <path d="m9 14 2 2 4-4"/>
-                </svg>
-              </div>
-              <h3 className="featureCardTitle">Digital Work Orders</h3>
-              <p className="featureCardDesc">
-                Paperless workflow with automated work order generation, status updates, and completion tracking.
-              </p>
-            </div>
-          </div>
+  <div className="sectionContainer">
+    <div className="features-wrapper">
+      <div className="features-image">
+        <img 
+          src="https://i.postimg.cc/ZRq82Ctm/solution.png" 
+          alt="Maintenance Features"
+          className="feature-img"
+        />
+      </div>
+      <div className="features-content">
+        <div className="title-wrapper">
+          <span className="subtitle">AI-Powered Platform</span>
+          <h2 className="features-title">
+            Smart Maintenance
+            <span className="highlight"> Solutions</span>
+          </h2>
         </div>
-      </section>
+        <p className="features-description">
+          Experience the future of facility management. Our platform combines cutting-edge computer vision with smart routing to deliver maintenance solutions that are 92% more accurate and 85% faster than traditional methods.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* How It Works Section */}
       <section id="how-it-works" className="howItWorks">
@@ -270,51 +204,21 @@ const Home = ({ onSigninClick, onSignupClick }) => {
 
       {/* Footer */}
       <footer className="footer">
-        <div className="sectionContainer">
-          <div className="footerContent">
-            <div className="footerBrand">
-              <div className="logo">MaintenanceAI</div>
-              <p className="footerDesc">
-                Intelligent maintenance management for modern institutions.
-              </p>
-            </div>
-            
-            <div className="footerLinks">
-              <div className="footerColumn">
-                <h4 className="footerTitle">Product</h4>
-                <a href="#" className="footerLink">Features</a>
-                <a href="#" className="footerLink">Pricing</a>
-                <a href="#" className="footerLink">Integrations</a>
-                <a href="#" className="footerLink">API</a>
-              </div>
-              
-              <div className="footerColumn">
-                <h4 className="footerTitle">Company</h4>
-                <a href="#" className="footerLink">About Us</a>
-                <a href="#" className="footerLink">Careers</a>
-                <a href="#" className="footerLink">Blog</a>
-                <a href="#" className="footerLink">Contact</a>
-              </div>
-              
-              <div className="footerColumn">
-                <h4 className="footerTitle">Support</h4>
-                <a href="#" className="footerLink">Help Center</a>
-                <a href="#" className="footerLink">Documentation</a>
-                <a href="#" className="footerLink">Status</a>
-                <a href="#" className="footerLink">Security</a>
-              </div>
-            </div>
-          </div>
-          
-          <div className="footerBottom">
-            <p>&copy; 2024 MaintenanceAI. All rights reserved.</p>
-            <div className="footerBottomLinks">
-              <a href="#" className="footerBottomLink">Privacy Policy</a>
-              <a href="#" className="footerBottomLink">Terms of Service</a>
-            </div>
-          </div>
-        </div>
-      </footer>
+  <div className="sectionContainer">
+    <div className="footerContent">
+      <div className="footerBrand">
+        <div className="logo">MaintenanceAI</div>
+      </div>
+      <div className="footerLinks">
+        <a href="#features" className="footerLink">About</a>
+        <a href="#" className="footerLink">Contact</a>
+      </div>
+    </div>
+    <div className="footerBottom">
+      <p>&copy; Team Lumora</p>
+    </div>
+  </div>
+</footer>
     </div>
   );
 };
