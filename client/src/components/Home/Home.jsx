@@ -31,7 +31,7 @@ const Home = ({ onSigninClick, onSignupClick }) => {
       <section className="hero">
         <div className={`heroContent ${isLoaded ? 'slideInLeft' : ''}`}>
           <h1 className="headline">
-            Intelligent Maintenance. 
+            Intelligent M<span className='colred'>ai</span>ntenance. 
             <br />
             Instant Response.
           </h1>
@@ -64,39 +64,11 @@ const Home = ({ onSigninClick, onSignupClick }) => {
         </div>
 
         <div className={`heroIllustration ${isLoaded ? 'slideInRight' : ''}`}>
-          <div className="illustrationCard">
-            <div className="aiIcon">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M12 1v6m0 6v6"/>
-                <path d="m21 12-6-3-6 3-6-3"/>
-                <path d="m21 12-6 3-6-3-6 3"/>
-                <path d="M12 1L9 9l9 3-9 3 3 8"/>
-              </svg>
-            </div>
-            <h3 className="cardTitle">AI Issue Classification</h3>
-            <p className="cardDescription">
-              Upload images and descriptions. Our AI instantly categorizes maintenance issues and routes them to the right technicians.
-            </p>
-            <div className="featuresGrid">
-              <div className="feature">
-                <div className="featureIcon">🔧</div>
-                <span>Plumbing</span>
-              </div>
-              <div className="feature">
-                <div className="featureIcon">⚡</div>
-                <span>Electrical</span>
-              </div>
-              <div className="feature">
-                <div className="featureIcon">🏗️</div>
-                <span>Civil</span>
-              </div>
-              <div className="feature">
-                <div className="featureIcon">🌡️</div>
-                <span>HVAC</span>
-              </div>
-            </div>
-          </div>
+          <img 
+            src="https://i.postimg.cc/7YDmxYyF/italy.png"
+            alt="Maintenance Management Illustration"
+            className="hero-image"
+          />
         </div>
       </section>
 
