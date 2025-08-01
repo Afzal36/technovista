@@ -36,38 +36,29 @@ const Signin = ({ onAuth, onClose, onSwitchToSignup }) => {
     return data;
   };
 
-  const handleEmailSignin = async () => {
-    try {
-      const userCred = await signInWithEmailAndPassword(auth, email, password);
-      const token = await userCred.user.getIdToken();
-      const backendRes = await sendTokenToBackend(token);
+   const handleEmailSignin = async () => {
+  try {
+    // First: Login Request
+    const loginRes = await fetch("http://localhost:5000/api/technicians/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        mail: email,
+        pass: password
+      })
+    });
 
-      onAuth(token);
+    const loginData = await loginRes.json();
+    console.log("Login Response:", loginData);
 
-      if (backendRes.user && backendRes.user.role === "admin") {
-        localStorage.setItem("role", "admin");
-        navigate("/dashboard");
-      } else if (backendRes.user && backendRes.user.role === "worker") {
-        // Fetch technician status from backend using new route
-        const techRes = await fetch(`http://localhost:5000/api/technicians/byemail?mail=${email}`);
-        const technician = await techRes.json();
-
-        if (technician && technician.status === true) {
-          localStorage.setItem("role", "worker");
-          navigate("/dashboard");
-        } else {
-          localStorage.removeItem("role");
-          alert("Your application has not been approved by the admin yet.");
-          navigate("/");
-        }
-      } else {
-        localStorage.setItem("role", "user");
-        navigate("/dashboard");
-      }
-    } catch (err) {
-      alert("Login failed");
-    }
-  };
+    
+  } catch (error) {
+    console.error("Error during email sign-in:", error);
+    alert("Something went wrong during sign-in.");
+  }
+};
 
   const handleGoogleSignin = async () => {
     try {

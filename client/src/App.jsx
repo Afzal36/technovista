@@ -8,6 +8,7 @@ import AdminDashboard from "./components/Admin/AdminDashboard";
 import WorkerDashboard from "./components/Worker/WorkerDashboard";
 import Home from "./components/Home/Home";
 import ReportIssue from "./components/User/ReportIssue";
+import SubscriptionPlans from "./components/Admin/AdminPaymentPage";
 
 const getDashboardComponent = (role) => {
   switch (role) {
@@ -67,63 +68,72 @@ const App = () => {
   };
 
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <Home
-                onSigninClick={() => setShowSignin(true)}
-                onSignupClick={() => setShowSignup(true)}
+     <Router>
+  <Routes>
+    <Route
+      path="/"
+      element={
+        <>
+          <Home
+            onSigninClick={() => setShowSignin(true)}
+            onSignupClick={() => setShowSignup(true)}
+          />
+          {showSignin && (
+            <div className="auth-container" onClick={handleOverlayClick}>
+              <Signin
+                onAuth={handleAuth}
+                onClose={() => setShowSignin(false)}
+                onSwitchToSignup={() => {
+                  setShowSignin(false);
+                  setShowSignup(true);
+                }}
               />
-              {showSignin && (
-                <div className="auth-container" onClick={handleOverlayClick}>
-                  <Signin
-                    onAuth={handleAuth}
-                    onClose={() => setShowSignin(false)}
-                    onSwitchToSignup={() => {
-                      setShowSignin(false);
-                      setShowSignup(true);
-                    }}
-                  />
-                </div>
-              )}
-              {showSignup && (
-                <div className="auth-container" onClick={handleOverlayClick}>
-                  <Signup
-                    onAuth={handleAuth}
-                    onClose={() => setShowSignup(false)}
-                     onSwitchToSignin={() => {
-                      setShowSignin(true);
-                      setShowSignup(false);
-                    }}
-                  />
-                </div>
-              )}
-            </>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute isAuth={isAuth}>
-              {getDashboardComponent(userRole)}
-              <button onClick={handleLogout}>Logout</button>
-            </ProtectedRoute>
-          }
-        />
-        <Route 
-          path="/report-issue" 
-          element={
-            <ProtectedRoute isAuth={isAuth}>
-              <ReportIssue />
-            </ProtectedRoute>
-          } 
-        />
-        <Route path="*" element={<Navigate to={isAuth ? "/dashboard" : "/"} />} />
-      </Routes>
-    </Router>
+            </div>
+          )}
+          {showSignup && (
+            <div className="auth-container" onClick={handleOverlayClick}>
+              <Signup
+                onAuth={handleAuth}
+                onClose={() => setShowSignup(false)}
+                onSwitchToSignin={() => {
+                  setShowSignin(true);
+                  setShowSignup(false);
+                }}
+              />
+            </div>
+          )}
+        </>
+      }
+    />
+    <Route
+      path="/dashboard"
+      element={
+        <ProtectedRoute isAuth={isAuth}>
+          {getDashboardComponent(userRole)}
+          <button onClick={handleLogout}>Logout</button>
+        </ProtectedRoute>
+      }
+    />
+    <Route 
+      path="/report-issue" 
+      element={
+        <ProtectedRoute isAuth={isAuth}>
+          <ReportIssue />
+        </ProtectedRoute>
+      } 
+    />
+    <Route 
+      path="/sub" 
+      element={
+    
+          <SubscriptionPlans />
+     
+      } 
+    />
+    <Route path="*" element={<Navigate to={isAuth ? "/dashboard" : "/"} />} />
+  </Routes>
+</Router>
+
   );
 };
 
