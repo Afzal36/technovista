@@ -17,6 +17,7 @@ router.get('/minimal-report', async (req, res) => {
 router.post('/minimal-report', async (req, res) => {
   try {
     const {
+      email,
       phone,
       address,
       label,
@@ -26,6 +27,7 @@ router.post('/minimal-report', async (req, res) => {
     } = req.body;
 
     const report = new MinimalIssueReport({
+      email,
       phone,
       address,
       label,
