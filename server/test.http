@@ -57,6 +57,13 @@ Content-Type: application/json
   "assignedTo": "Technician A"
 }
 
+
 ###
-GET http://localhost:5000/api/issues/minimal-report
+post http://localhost:5000/api/reports/assigned
 Content-Type: application/json
+
+{
+  "assignedTo": "Technician A"
+}
+
+
