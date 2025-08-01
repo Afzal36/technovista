@@ -51,4 +51,20 @@ router.get('/minimal-report', async (req, res) => {
   }
 });
 
+// Accept/update a report
+router.patch('/minimal-report/:id', async (req, res) => {
+  try {
+    const { status, assignedTo } = req.body;
+    const report = await MinimalIssueReport.findByIdAndUpdate(
+      req.params.id,
+      { status, assignedTo },
+      { new: true }
+    );
+    if (!report) return res.status(404).json({ error: "Report not found" });
+    res.json(report);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update report', details: err.message });
+  }
+});
+
 module.exports = router;
