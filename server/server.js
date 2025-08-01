@@ -2,13 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const admin = require("firebase-admin");
 const imageClassifierRoute = require("./routes/imageClassifier");
-const userRoutes = require("./routes/userRoutes"); // renamed from authRoute
-
-
-
-
+const userRoutes = require("./routes/userRoutes");
 const adminActions = require('./routes/adminactions');
 const technicianRoutes = require("./routes/technicianRoutes");
 const authRoute = require("./routes/auth");
@@ -19,15 +14,7 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: "10mb" })); // Increase limit to 10MB
-
-
-// Firebase Admin SDK Initialization
-const serviceAccount = require('../server/firebase.json');
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+app.use(express.json({ limit: "10mb" }));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI).then(() => {
@@ -41,7 +28,7 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
 
 // Routes
 app.use("/api/technicians", technicianRoutes);
-app.use("/", authRoute);
+app.use("/api/auth", authRoute);
 app.use('/api/admin', adminActions);
 app.use("/api/image", imageClassifierRoute);
 app.use("/api/users", userRoutes);

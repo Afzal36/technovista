@@ -2,35 +2,34 @@ import React, { useEffect, useState } from "react";
 import "./AdminDashboard.css";
 
 function AdminDashboard() {
-  const [technicians, setTechnicians] = useState([]);
+  const [workers, setWorkers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [modalImage, setModalImage] = useState(null);
 
-  // Fetch all technician requests
+  // Fetch all worker requests
   useEffect(() => {
-    fetch("http://localhost:5000/api/technicians")
+    fetch("http://localhost:5000/api/admin/workers")
       .then((res) => res.json())
       .then((data) => {
-        setTechnicians(data);
+        setWorkers(data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
 
-  // Accept technician
+  // Accept worker
   const handleAccept = async (id) => {
     try {
-     const res = await fetch(`http://localhost:5000/api/admin/accept-technician/${id}`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" }
-});
-
+      const res = await fetch(`http://localhost:5000/api/admin/accept-worker/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
       if (res.ok) {
-        setTechnicians((prev) =>
-          prev.map((tech) =>
-            tech._id === id ? { ...tech, status: true } : tech
+        setWorkers((prev) =>
+          prev.map((worker) =>
+            worker._id === id ? { ...worker, status: true } : worker
           )
         );
       }
@@ -39,14 +38,14 @@ function AdminDashboard() {
     }
   };
 
-  // Decline technician
+  // Decline worker
   const handleDecline = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/technicians/${id}`, {
+      const res = await fetch(`http://localhost:5000/api/admin/workers/${id}`, {
         method: "DELETE",
       });
       if (res.ok) {
-        setTechnicians((prev) => prev.filter((tech) => tech._id !== id));
+        setWorkers((prev) => prev.filter((worker) => worker._id !== id));
       }
     } catch (err) {
       alert("Failed to decline request");
@@ -54,23 +53,23 @@ function AdminDashboard() {
   };
 
   // Stats
-  const pendingCount = technicians.filter(t => !t.status).length;
-  const acceptedCount = technicians.filter(t => t.status).length;
+  const pendingCount = workers.filter(w => !w.status).length;
+  const acceptedCount = workers.filter(w => w.status).length;
 
   // Improved search: search by name, field, email, phone, experience
-  const filteredTechnicians = technicians.filter(tech => {
+  const filteredWorkers = workers.filter(worker => {
     const term = searchTerm.trim().toLowerCase();
     const matchesSearch =
-      tech.name.toLowerCase().includes(term) ||
-      tech.field.toLowerCase().includes(term) ||
-      tech.mail.toLowerCase().includes(term) ||
-      tech.phno.toLowerCase().includes(term) ||
-      String(tech.experience).includes(term);
+      (worker.name || "").toLowerCase().includes(term) ||
+      (worker.field || "").toLowerCase().includes(term) ||
+      (worker.email || "").toLowerCase().includes(term) ||
+      (worker.phone || "").toLowerCase().includes(term) ||
+      String(worker.experience || "").includes(term);
 
     const matchesStatus =
       statusFilter === "all" ||
-      (statusFilter === "pending" && !tech.status) ||
-      (statusFilter === "accepted" && tech.status);
+      (statusFilter === "pending" && !worker.status) ||
+      (statusFilter === "accepted" && worker.status);
 
     return matchesSearch && matchesStatus;
   });
@@ -107,7 +106,7 @@ function AdminDashboard() {
         <div className="stats-card total">
           <div className="stats-content">
             <div>
-              <div className="stats-number">{technicians.length}</div>
+              <div className="stats-number">{workers.length}</div>
               <div className="stats-label">Total Requests</div>
             </div>
             <div className="stats-icon total">
@@ -159,38 +158,38 @@ function AdminDashboard() {
       {loading ? (
         <div className="loading-state">
           <div className="spinner"></div>
-          <p>Loading technician requests...</p>
+          <p>Loading worker requests...</p>
         </div>
-      ) : filteredTechnicians.length === 0 ? (
+      ) : filteredWorkers.length === 0 ? (
         <div className="empty-state">
           <i className="fas fa-users empty-icon"></i>
-          <h4>No technician requests found</h4>
+          <h4>No worker requests found</h4>
           <p>Try adjusting your search criteria or check back later.</p>
         </div>
       ) : (
         <div className="technicians-grid">
-          {filteredTechnicians.map((tech) => (
-            <div key={tech._id} className={`technician-card ${tech.status ? "accepted" : "pending"}`}>
+          {filteredWorkers.map((worker) => (
+            <div key={worker._id} className={`technician-card ${worker.status ? "accepted" : "pending"}`}>
               <div
                 className="technician-image"
                 onClick={() => {
-                  if (tech.aadhaarImage) {
+                  if (worker.aadhaarImage) {
                     setModalImage(
-                      tech.aadhaarImage.startsWith("data:")
-                        ? tech.aadhaarImage
-                        : `data:image/jpeg;base64,${tech.aadhaarImage}`
+                      worker.aadhaarImage.startsWith("data:")
+                        ? worker.aadhaarImage
+                        : `data:image/jpeg;base64,${worker.aadhaarImage}`
                     );
                   }
                 }}
-                style={{ cursor: tech.aadhaarImage ? "pointer" : "default" }}
-                title={tech.aadhaarImage ? "Click to view Aadhaar" : ""}
+                style={{ cursor: worker.aadhaarImage ? "pointer" : "default" }}
+                title={worker.aadhaarImage ? "Click to view Aadhaar" : ""}
               >
-                {tech.aadhaarImage ? (
+                {worker.aadhaarImage ? (
                   <img
                     src={
-                      tech.aadhaarImage.startsWith("data:")
-                        ? tech.aadhaarImage
-                        : `data:image/jpeg;base64,${tech.aadhaarImage}`
+                      worker.aadhaarImage.startsWith("data:")
+                        ? worker.aadhaarImage
+                        : `data:image/jpeg;base64,${worker.aadhaarImage}`
                     }
                     alt="Aadhaar"
                     className="aadhaar-image"
@@ -205,43 +204,43 @@ function AdminDashboard() {
 
               <div className="technician-content">
                 <div className="technician-header">
-                  <h3 className="technician-name">{tech.name}</h3>
-                  <span className={`status-badge ${tech.status ? 'accepted' : 'pending'}`}>
-                    {tech.status ? 'Accepted' : 'Pending'}
+                  <h3 className="technician-name">{worker.name}</h3>
+                  <span className={`status-badge ${worker.status ? 'accepted' : 'pending'}`}>
+                    {worker.status ? 'Accepted' : 'Pending'}
                   </span>
                 </div>
 
                 <div className="technician-details">
                   <div className="technician-info">
                     <i className="fas fa-briefcase"></i>
-                    <span>{tech.field}</span>
+                    <span>{worker.field}</span>
                   </div>
                   <div className="technician-info">
                     <i className="fas fa-phone"></i>
-                    <span>{tech.phno}</span>
+                    <span>{worker.phone}</span>
                   </div>
                   <div className="technician-info">
                     <i className="fas fa-envelope"></i>
-                    <span>{tech.mail}</span>
+                    <span>{worker.email}</span>
                   </div>
                   <div className="technician-info">
                     <i className="fas fa-clock"></i>
-                    <span>{tech.experience} years experience</span>
+                    <span>{worker.experience} years experience</span>
                   </div>
                 </div>
 
-                {!tech.status && (
+                {!worker.status && (
                   <div className="action-buttons">
                     <button
                       className="btn-accept"
-                      onClick={() => handleAccept(tech._id)}
+                      onClick={() => handleAccept(worker._id)}
                     >
                       <i className="fas fa-check"></i>
                       Accept
                     </button>
                     <button
                       className="btn-decline"
-                      onClick={() => handleDecline(tech._id)}
+                      onClick={() => handleDecline(worker._id)}
                     >
                       <i className="fas fa-times"></i>
                       Decline

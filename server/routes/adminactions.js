@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const admin = require('firebase-admin');
-const Technician = require('../models/Technician');
-const User = require('../models/User'); // ✅ Import User model
+const User = require('../models/User');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
-// Email setup
+// Email setup (unchanged)
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -15,55 +14,57 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Accept technician and send credentials
-router.post('/accept-technician/:id', async (req, res) => {
+// Accept worker and send credentials
+router.post('/accept-worker/:id', async (req, res) => {
   try {
-    const technicianId = req.params.id;
+    const workerId = req.params.id;
 
-    // Find technician by ID
-    const technician = await Technician.findById(technicianId);
-    if (!technician) return res.status(404).json({ error: 'Technician not found' });
+    // Find worker by ID (role: worker)
+    const worker = await User.findOne({ _id: workerId, role: 'worker' });
+    if (!worker) return res.status(404).json({ error: 'Worker not found' });
 
     // Generate random password
     const randomPassword = crypto.randomBytes(4).toString('hex'); // 8 characters
 
-    // Create Firebase Auth user
-    const firebaseUser = await admin.auth().createUser({
-      email: technician.mail,
-      password: randomPassword,
-    });
-    console.log(firebaseUser);
-
     // Send email with credentials
     const mailOptions = {
       from: "buildwithlumora@gmail.com",
-      to: technician.mail,
+      to: worker.email,
       subject: 'Your Login Credentials',
-      text: `Hello ${technician.name},\n\nYou are approved!\n\nLogin Credentials:\nEmail: ${technician.mail}\nPassword: ${randomPassword}\n\nPlease change your password after login.\n\nRegards,\nAdmin Team`,
+      text: `Hello ${worker.name},\n\nYou are approved!\n\nLogin Credentials:\nEmail: ${worker.email}\nPassword: ${randomPassword}\n\nPlease change your password after login.\n\nRegards,\nAdmin Team`,
     };
     await transporter.sendMail(mailOptions);
-    console.log("sent mai;");
-    // Update technician status and store password
-    technician.status = true;
-    technician.pass = randomPassword;
-    await technician.save();
 
-    // ✅ Save to users collection
-    const newUser = new User({
-      uid: firebaseUser.uid,
-      email: technician.mail,
-      phone: technician.phno,
-      name: technician.name,
-      role: 'technician',
-      field: technician.field || '', 
-      password:randomPassword
-    });
-    await newUser.save();
+    // Update worker status and set new password (hashed)
+    worker.status = true;
+    worker.password = await bcrypt.hash(randomPassword, 10);
+    await worker.save();
 
-    res.status(200).json({ message: 'Technician approved and credentials sent' });
+    res.status(200).json({ message: 'Worker approved and credentials sent' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+// Get all workers (for dashboard)
+router.get('/workers', async (req, res) => {
+  try {
+    const workers = await User.find({ role: 'worker' }).select('-password').sort({ createdAt: -1 });
+    res.json(workers);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Decline (delete) a worker
+router.delete('/workers/:id', async (req, res) => {
+  try {
+    const worker = await User.findOneAndDelete({ _id: req.params.id, role: 'worker' });
+    if (!worker) return res.status(404).json({ error: "Worker not found" });
+    res.json({ message: "Worker deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
