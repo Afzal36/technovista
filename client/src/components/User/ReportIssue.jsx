@@ -9,8 +9,6 @@ const ReportIssue = () => {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [urgency, setUrgency] = useState('medium');
-  const [prediction, setPrediction] = useState(null);
-  const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
 
   const categories = [
@@ -54,12 +52,10 @@ const ReportIssue = () => {
       const reader = new FileReader();
       reader.onload = (e) => {
         setImage(e.target.result);
-        setPrediction(null); // Clear previous prediction
-        setError(null); // Clear previous errors
       };
       reader.readAsDataURL(file);
     } else {
-      setError('Please upload an image file');
+      console.error('Please upload an image file');
     }
   };
 
@@ -67,111 +63,45 @@ const ReportIssue = () => {
     fileInputRef.current.click();
   };
 
-  // Test CORS endpoint first
-  const testCORS = async () => {
-    try {
-      const response = await fetch('http://127.0.0.1:5000/test-cors', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('CORS test successful:', data);
-        return true;
-      } else {
-        console.error('CORS test failed with status:', response.status);
-        return false;
-      }
-    } catch (error) {
-      console.error('CORS test error:', error);
-      return false;
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setPrediction(null);
-
-    // First test CORS
-    console.log('Testing CORS connection...');
-    const corsTest = await testCORS();
-    if (!corsTest) {
-      setError('CORS test failed. Please check if the backend server is running.');
-      setLoading(false);
-      return;
-    }
 
     // Create FormData object to handle file upload
     const formData = new FormData();
-    
     // Ensure we have a file before appending
     if (fileInputRef.current && fileInputRef.current.files[0]) {
       formData.append('image', fileInputRef.current.files[0]);
-      console.log('Image file added to form data');
-    } else {
-      setError('No image file selected');
-      setLoading(false);
-      return;
     }
-    
-    // Add other form data
     formData.append('category', category);
     formData.append('urgency', urgency);
     if (description.trim()) {
       formData.append('description', description);
     }
 
-    console.log('Sending prediction request...');
-    
     try {
       const response = await fetch('http://127.0.0.1:5000/predict', {
         method: 'POST',
         body: formData,
-        // Don't set Content-Type header when using FormData - let browser set it
       });
-
-      console.log('Response status:', response.status);
-      console.log('Response headers:', [...response.headers.entries()]);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
 
       const data = await response.json();
       console.log('Backend Response:', data);
 
-      // Set prediction results
-      setPrediction(data);
-
-      // Show success and reset form if successful
-      if (data.predicted_label) {
-        setTimeout(() => {
-          setImage(null);
-          setCategory('');
-          setDescription('');
-          setUrgency('medium');
-          setPrediction(null);
-          if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-          }
-        }, 5000); // Clear after 5 seconds to show results
+      // Show success animation and reset form if successful
+      if (response.ok) {
+        setImage(null);
+        setCategory('');
+        setDescription('');
+        setUrgency('medium');
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } else {
+        console.error('Server Error:', data);
       }
-
     } catch (error) {
-      console.error('Request Error:', error);
-      setError(`Network Error: ${error.message}`);
-      
-      // Provide troubleshooting info
-      if (error.message.includes('CORS')) {
-        setError('CORS Error: Please make sure the Flask server is running with CORS enabled on http://127.0.0.1:5000');
-      } else if (error.message.includes('Failed to fetch')) {
-        setError('Connection Error: Cannot reach the server. Please check if Flask server is running on port 5000.');
-      }
+      console.error('Network Error:', error);
     } finally {
       setLoading(false);
     }
@@ -179,11 +109,7 @@ const ReportIssue = () => {
 
   const handleClearImage = () => {
     setImage(null);
-    setPrediction(null);
-    setError(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    fileInputRef.current.value = '';
   };
 
   return (
@@ -232,6 +158,30 @@ const ReportIssue = () => {
           )}
         </div>
 
+        {/* Category Selection */}
+        <div className="form-group">
+          <label className="form-label">
+            Issue Category
+            <div className="select-wrapper">
+              <select 
+                value={category} 
+                onChange={(e) => setCategory(e.target.value)}
+                className="category-select"
+                required
+              >
+                <option value="">Select category</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.icon} {cat.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="select-icon" size={20} />
+            </div>
+          </label>
+        </div>
+
+       
 
         {/* Description */}
         <div className="form-group">
@@ -256,7 +206,7 @@ const ReportIssue = () => {
           {loading ? (
             <>
               <Loader className="spin-icon" size={20} />
-              Analyzing Image...
+              Submitting...
             </>
           ) : (
             <>
@@ -265,12 +215,6 @@ const ReportIssue = () => {
             </>
           )}
         </button>
-
-        {/* Debug Info */}
-        <div style={{ marginTop: '16px', fontSize: '12px', color: '#666' }}>
-          <p>Server: http://127.0.0.1:5000</p>
-          <p>Status: {error ? '❌ Error' : prediction ? '✅ Success' : '⏳ Ready'}</p>
-        </div>
       </form>
     </div>
   );

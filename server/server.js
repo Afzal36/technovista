@@ -21,12 +21,7 @@ app.use(express.json({ limit: "10mb" })); // Increase limit to 10MB
 
 
 // Firebase Admin SDK Initialization
-<<<<<<< HEAD
 const serviceAccount = require('../server/firebase.json');
-=======
-//const admin = require("firebase-admin");
-const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
->>>>>>> 6a5ba6ac17ffd166386024748929f35acafe4150
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),

@@ -54,7 +54,6 @@ const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
     try {
       if (role === "worker") {
         // Register worker in Firebase Auth
-        await createUserWithEmailAndPassword(auth, email, password);
 
         // Register worker in MongoDB
         const formData = new FormData();
@@ -80,11 +79,9 @@ const SignUp = ({ onAuth, onClose, onSwitchToSignin }) => {
         } else {
           alert(data.error || "Worker registration failed");
         }
-      } else {
-        const userCred = await createUserWithEmailAndPassword(auth, email, password);
-        const token = await userCred.user.getIdToken();
-        onAuth(token);
-        navigate("/dashboard");
+      }
+      if(role==="user"){
+        console.log("Hello");
       }
     } catch (err) {
       alert("Signup failed");
