@@ -35,3 +35,11 @@ Content-Type: application/json
   "field": "electrical"
 }
 
+###
+POST http://localhost:5000/api/technicians/login
+Content-Type: application/json
+
+{
+  "mail": "srikarjanjirala92@gmail.com",
+  "pass": "9a2216a5"
+}
