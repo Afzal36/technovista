@@ -1,9 +1,10 @@
-
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Users, Search, Plus, AlertTriangle, LogOut } from 'lucide-react';
 import './UserDashBoard.css';
 
 const UserDashBoard = () => {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('my-communities');
 
   // Static data for My Communities
@@ -76,9 +77,8 @@ const UserDashBoard = () => {
     // Add your leave community logic here
   };
 
-  const handleReportIssue = (communityId) => {
-    console.log(`Reporting issue for community ${communityId}`);
-    // Add your report issue logic here
+  const handleReportIssue = () => {
+    navigate('/report-issue');
   };
 
   const handleJoinCommunity = (communityId) => {

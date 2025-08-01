@@ -4,6 +4,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const admin = require("firebase-admin");
 
+const adminActions = require('./routes/adminactions');
 const technicianRoutes = require("./routes/technicianRoutes");
 const authRoute = require("./routes/auth");
 
@@ -35,3 +36,4 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
 // Routes
 app.use("/api/technicians", technicianRoutes);
 app.use("/", authRoute);
+app.use('/api/admin', adminActions);
