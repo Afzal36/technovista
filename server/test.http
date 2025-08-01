@@ -26,8 +26,9 @@ POST http://localhost:5000/api/users/signup
 Content-Type: application/json
 
 {
-  "uid": "abc123",
-  "email": "example@email.com",
+  "uid": "abc1234",
+  "email": "example1@email.com",
+  "password": "yourStrongPassword123",
   "phone": "9876543210",
   "name": "John Doe",
   "role": "technician",
