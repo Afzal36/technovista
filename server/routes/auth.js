@@ -65,12 +65,25 @@ router.post("/login", async (req, res) => {
     if (!match) return res.status(401).json({ error: "Invalid credentials" });
     const token = jwt.sign({ id: user._id, role: user.role, email: user.email }, JWT_SECRET, { expiresIn: "1d" });
 
-    // For workers, return status
+    // Send all user fields except password
+    const userObj = {
+      email: user.email,
+      role: user.role,
+      name: user.name,
+      phone: user.phone,
+      address: user.address,
+      field: user.field,
+      aadhaarImage: user.aadhaarImage,
+      experience: user.experience,
+      status: user.status,
+      createdAt: user.createdAt
+    };
+
     if (user.role === "worker") {
-      return res.json({ token, role: user.role, status: user.status, user: { email: user.email, role: user.role, name: user.name } });
+      return res.json({ token, role: user.role, status: user.status, user: userObj });
     }
 
-    return res.json({ token, role: user.role, user: { email: user.email, role: user.role, name: user.name } });
+    return res.json({ token, role: user.role, user: userObj });
   }
   return res.status(404).json({ error: "User not found" });
 });

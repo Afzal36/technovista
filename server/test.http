@@ -55,3 +55,7 @@ Content-Type: application/json
   "label": "A leaking pipe or plumbing issue",
   "category": "plumber"
 }
+
+###
+GET http://localhost:5000/api/issues/minimal-report
+Content-Type: application/json

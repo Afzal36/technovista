@@ -18,6 +18,8 @@ const Signin = ({ onAuth, onClose, onSwitchToSignup }) => {
       if (res.ok) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
+        localStorage.setItem("user", JSON.stringify(data.user)); // Save user object
+        console.log(data.user); // Log user object to console
         onAuth(data.token);
 
         if (data.role === "admin") {
@@ -28,6 +30,7 @@ const Signin = ({ onAuth, onClose, onSwitchToSignup }) => {
           } else {
             localStorage.removeItem("token");
             localStorage.removeItem("role");
+            localStorage.removeItem("user");
             alert("Your application has not been approved by the admin yet.");
             navigate("/");
           }
