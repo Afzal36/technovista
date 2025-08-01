@@ -31,7 +31,6 @@ const App = () => {
   const [showSignup, setShowSignup] = useState(false);
 
   const handleAuth = (token) => {
-    // decode token if needed, or just set isAuth and userRole from localStorage
     setIsAuth(true);
     setUserRole(localStorage.getItem("role"));
     setShowSignin(false);
@@ -53,74 +52,16 @@ const App = () => {
   };
 
   return (
-     <Router>
-  <Routes>
-    <Route
-      path="/"
-      element={
-        <>
-          <Home
-            onSigninClick={() => setShowSignin(true)}
-            onSignupClick={() => setShowSignup(true)}
-          />
-          {showSignin && (
-            <div className="auth-container" onClick={handleOverlayClick}>
-              <Signin
-                onAuth={handleAuth}
-                onClose={() => setShowSignin(false)}
-                onSwitchToSignup={() => {
-                  setShowSignin(false);
-                  setShowSignup(true);
-                }}
+    <Router>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <Home
+                onSigninClick={() => setShowSignin(true)}
+                onSignupClick={() => setShowSignup(true)}
               />
-<<<<<<< HEAD
-            </div>
-          )}
-          {showSignup && (
-            <div className="auth-container" onClick={handleOverlayClick}>
-              <Signup
-                onAuth={handleAuth}
-                onClose={() => setShowSignup(false)}
-                onSwitchToSignin={() => {
-                  setShowSignin(true);
-                  setShowSignup(false);
-                }}
-              />
-            </div>
-          )}
-        </>
-      }
-    />
-    <Route
-      path="/dashboard"
-      element={
-        <ProtectedRoute isAuth={isAuth}>
-          {getDashboardComponent(userRole)}
-          <button onClick={handleLogout}>Logout</button>
-        </ProtectedRoute>
-      }
-    />
-    <Route 
-      path="/report-issue" 
-      element={
-        <ProtectedRoute isAuth={isAuth}>
-          <ReportIssue />
-        </ProtectedRoute>
-      } 
-    />
-    <Route 
-      path="/sub" 
-      element={
-    
-          <SubscriptionPlans />
-     
-      } 
-    />
-    <Route path="*" element={<Navigate to={isAuth ? "/dashboard" : "/"} />} />
-  </Routes>
-</Router>
-
-=======
               {showSignin && (
                 <div className="auth-container" onClick={handleOverlayClick}>
                   <Signin
@@ -165,10 +106,13 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/sub"
+          element={<SubscriptionPlans />}
+        />
         <Route path="*" element={<Navigate to={isAuth ? "/dashboard" : "/"} />} />
       </Routes>
     </Router>
->>>>>>> 59c4d4bc99c7370dd12ba84142460741d6503aa5
   );
 };
 

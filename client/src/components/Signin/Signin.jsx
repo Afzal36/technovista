@@ -7,54 +7,6 @@ const Signin = ({ onAuth, onClose, onSwitchToSignup }) => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-<<<<<<< HEAD
-  const sendTokenToBackend = async (token) => {
-    const res = await fetch("http://localhost:5000/auth", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    });
-    const data = await res.json();
-    return data;
-  };
-
-   const handleEmailSignin = async () => {
-  try {
-    // First: Login Request
-    const loginRes = await fetch("http://localhost:5000/api/technicians/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        mail: email,
-        pass: password
-      })
-    });
-
-    const loginData = await loginRes.json();
-    console.log("Login Response:", loginData);
-
-    
-  } catch (error) {
-    console.error("Error during email sign-in:", error);
-    alert("Something went wrong during sign-in.");
-  }
-};
-
-  const handleGoogleSignin = async () => {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const token = await result.user.getIdToken();
-      await sendTokenToBackend(token);
-      onAuth(token);
-      localStorage.setItem("role", "user");
-      navigate("/dashboard");
-    } catch (err) {
-      alert("Google Login failed");
-=======
   const handleEmailSignin = async () => {
     try {
       const res = await fetch("http://localhost:5000/api/auth/login", {
@@ -87,7 +39,6 @@ const Signin = ({ onAuth, onClose, onSwitchToSignup }) => {
       }
     } catch (err) {
       alert("Login failed: " + err.message);
->>>>>>> 59c4d4bc99c7370dd12ba84142460741d6503aa5
     }
   };
 
