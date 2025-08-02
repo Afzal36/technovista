@@ -12,3 +12,42 @@
   --pure-white: #FFFFFF;
   --warm-beige: #EDE8DF;
 }
+/* Logout Button Styles */
+.logout-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: var(--charcoal-black);
+  color: var(--pure-white);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 999;
+  box-shadow: 0 2px 8px rgba(26, 26, 26, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logout-btn:hover {
+  background-color: var(--muted-gray);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 26, 26, 0.2);
+   background-color: #dc2626;
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+}
+
+/* Alternative red variant for logout */
+.logout-btn.danger {
+  background-color: #dc2626;
+}
+
+.logout-btn.danger:hover {
+  background-color: #b91c1c;
+}

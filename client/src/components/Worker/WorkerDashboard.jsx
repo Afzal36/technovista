@@ -5,6 +5,7 @@ function WorkerDashboard() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("assigned"); // "assigned" or "all"
+  const [assignedStatusFilter, setAssignedStatusFilter] = useState("all"); // "all", "progress", "completed"
 
   // Get logged-in worker info from localStorage
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -68,82 +69,165 @@ function WorkerDashboard() {
     }
   };
 
-  // Filter reports based on selected filter
-  const displayedReports =
-    filter === "assigned"
-      ? reports.filter((report) => report.assignedTo === user.name)
-      : reports;
+  // Calculate stats
+  const totalReports = reports.length;
+  const assignedToMe = reports.filter(report => report.assignedTo === user.name).length;
+
+  // Filter reports based on selected filter and status filter
+  let displayedReports = filter === "assigned"
+    ? reports.filter((report) => report.assignedTo === user.name)
+    : reports;
+
+  // Apply status filter for assigned reports
+  if (filter === "assigned" && assignedStatusFilter !== "all") {
+    displayedReports = displayedReports.filter(report => report.status === assignedStatusFilter);
+  }
 
   return (
     <div className="worker-dashboard-container">
-      <h2 className="worker-dashboard-title">
-        {user.name ? `${user.name}'s` : "Worker"} Issue Reports
-      </h2>
-      <div className="worker-dashboard-subtitle">
-        Showing reports for: <span className="worker-field">{user.field || "N/A"}</span>
-      </div>
-      <div className="worker-filter-row">
-        <button
-          className={`worker-filter-btn${filter === "assigned" ? " active" : ""}`}
-          onClick={() => setFilter("assigned")}
-        >
-          Assigned to Me
-        </button>
-        <button
-          className={`worker-filter-btn${filter === "all" ? " active" : ""}`}
-          onClick={() => setFilter("all")}
-        >
-          All {user.field} Reports
-        </button>
-      </div>
-      {loading ? (
-        <div className="worker-loading">Loading reports...</div>
-      ) : displayedReports.length === 0 ? (
-        <div className="worker-empty">
-          <i className="fas fa-check-circle"></i>
-          No reports found for this filter.
+      
+
+      {/* Stats Cards */}
+      <div className="stats-container">
+        <div className="stat-card">
+          <div className="stat-icon">
+            <i className="fas fa-clipboard-list"></i>
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{totalReports}</div>
+            <div className="stat-label">Total Reports</div>
+          </div>
         </div>
-      ) : (
-        <div className="worker-reports-list">
-          {displayedReports.map((report) => (
-            <div key={report._id} className="worker-report-card">
-              <div className="worker-report-label">{report.label}</div>
-              <div className="worker-report-info">
-                <span>
-                  <i className="fas fa-phone"></i> {report.phone}
-                </span>
-                <span>
-                  <i className="fas fa-map-marker-alt"></i> {report.address}
-                </span>
-                <span>
-                  <i className="fas fa-tag"></i> {report.category}
-                </span>
-                <span>
-                  <i className="fas fa-user"></i> Assigned to: {report.assignedTo || "Unassigned"}
-                </span>
-                <span>
-                  <i className="fas fa-clock"></i>{" "}
-                  {new Date(report.reportedAt).toLocaleString()}
-                </span>
-                <span>
-                  <i className="fas fa-info-circle"></i> Status: {report.status}
-                </span>
-              </div>
-              {report.status === "none" && (
-                <button
-                  className="worker-accept-btn"
-                  onClick={() => handleAcceptReport(report._id)}
-                >
-                  Accept Report
-                </button>
-              )}
-              {report.status === "progress" && report.assignedTo === user.name && (
-                <span className="worker-progress-badge">Accepted by you</span>
-              )}
+        <div className="stat-card">
+          <div className="stat-icon assigned">
+            <i className="fas fa-user-check"></i>
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{assignedToMe}</div>
+            <div className="stat-label">Assigned to Me</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter Section */}
+      <div className="filter-section">
+        <div className="main-filters">
+          <button
+            className={`filter-btn${filter === "assigned" ? " active" : ""}`}
+            onClick={() => setFilter("assigned")}
+          >
+            <i className="fas fa-user"></i>
+            Assigned to Me
+          </button>
+          <button
+            className={`filter-btn${filter === "all" ? " active" : ""}`}
+            onClick={() => setFilter("all")}
+          >
+            <i className="fas fa-list"></i>
+            All {user.field} Reports
+          </button>
+        </div>
+
+        {/* Status filter for assigned reports */}
+        {filter === "assigned" && (
+          <div className="status-filters">
+            <span className="filter-label">Status:</span>
+            <button
+              className={`status-filter-btn${assignedStatusFilter === "all" ? " active" : ""}`}
+              onClick={() => setAssignedStatusFilter("all")}
+            >
+              All
+            </button>
+            <button
+              className={`status-filter-btn${assignedStatusFilter === "progress" ? " active" : ""}`}
+              onClick={() => setAssignedStatusFilter("progress")}
+            >
+              In Progress
+            </button>
+            <button
+              className={`status-filter-btn${assignedStatusFilter === "completed" ? " active" : ""}`}
+              onClick={() => setAssignedStatusFilter("completed")}
+            >
+              Completed
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Reports Section */}
+      <div className="reports-section">
+        {loading ? (
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <div className="loading-text">Loading reports...</div>
+          </div>
+        ) : displayedReports.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">
+              <i className="fas fa-check-circle"></i>
             </div>
-          ))}
+            <div className="empty-text">No reports found for this filter.</div>
+          </div>
+        ) : (
+          // Replace the reports-grid section with:
+
+<div className="worker-reports-grid">
+  {displayedReports.map((report) => (
+    <div key={report._id} className="worker-report-card">
+      <div className="worker-report-header">
+        <div className="worker-report-title">{report.label}</div>
+        <div className={`status-badge status-${report.status}`}>
+          {report.status === "none" ? "Unassigned" :
+           report.status === "progress" ? "In Progress" :
+           report.status === "completed" ? "Completed" : report.status}
         </div>
-      )}
+      </div>
+
+      <div className="worker-report-details">
+        <div className="worker-detail-item">
+          <i className="fas fa-phone"></i>
+          <span>{report.phone}</span>
+        </div>
+        <div className="worker-detail-item">
+          <i className="fas fa-map-marker-alt"></i>
+          <span>{report.address}</span>
+        </div>
+        <div className="worker-detail-item">
+          <i className="fas fa-tag"></i>
+          <span>{report.category}</span>
+        </div>
+        <div className="worker-detail-item">
+          <i className="fas fa-user"></i>
+          <span>Assigned: {report.assignedTo || "Unassigned"}</span>
+        </div>
+        <div className="worker-detail-item">
+          <i className="fas fa-clock"></i>
+          <span>{new Date(report.reportedAt).toLocaleDateString()}</span>
+        </div>
+      </div>
+
+      <div className="worker-report-actions">
+        {report.status === "none" && (
+          <button
+            className="accept-btn"
+            onClick={() => handleAcceptReport(report._id)}
+          >
+            <i className="fas fa-check"></i>
+            Accept Report
+          </button>
+        )}
+        {report.status === "progress" && report.assignedTo === user.name && (
+          <div className="progress-indicator">
+            <i className="fas fa-cog fa-spin"></i>
+            Working on this
+          </div>
+        )}
+      </div>
+    </div>
+  ))}
+</div>
+        )}
+      </div>
     </div>
   );
 }

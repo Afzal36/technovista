@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Home.css';
 
 const Home = ({ onSigninClick, onSignupClick }) => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsLoaded(true);
   }, []);
+
+  const handlePricingButtonClick = () => {
+    navigate('/sub');
+  };
 
   return (
     <div className="homeContainer">
       {/* Navigation */}
        <nav className={`navbar ${isLoaded ? 'fadeIn' : ''}`}>
         <div className="logo">
-          MaintenanceAI
+          <span className='black123'>Maint<span className='green123'>ai</span>nance</span> 
         </div>
         <div className="navLinks">
         </div>
@@ -50,14 +56,14 @@ const Home = ({ onSigninClick, onSignupClick }) => {
           <div className="statsRow">
             <div className="stat">
               
-              <span className="statLabel">Faster</span>
+              <span className="statLabel">Faster Response</span>
             </div>
             <div className="stat">
 
-              <span className="statLabel">Accurate</span>
+              <span className="statLabel">Accuracy Rate</span>
             </div>
             <div className="stat">
-            
+
               <span className="statLabel">Institutional</span>
             </div>
           </div>
@@ -155,47 +161,177 @@ const Home = ({ onSigninClick, onSignupClick }) => {
         </div>
       </section>
 
-      {/* Institutions Section */}
-      <section className="institutions">
+      {/* Pricing Section */}
+      <section className="pricing">
         <div className="sectionContainer">
           <div className="sectionHeader">
-            <h2 className="sectionTitle">Built for Institutions</h2>
+            <h2 className="sectionTitle">Plans that grow with you</h2>
             <p className="sectionSubtitle">
-              Trusted by leading organizations worldwide
+              Choose the perfect plan for your maintenance needs
             </p>
+
           </div>
 
-          <div className="institutionsGrid">
-            <div className="institutionCard">
-              <div className="institutionIcon">🏫</div>
-              <h3 className="institutionTitle">Universities</h3>
-              <p className="institutionDesc">
-                Manage campus-wide maintenance across dormitories, academic buildings, and facilities.
-              </p>
+          <div className="pricingGrid">
+            <div className="pricingCard">
+              <div className="planIcon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </div>
+              <h3 className="planTitle">Starter</h3>
+              <p className="planSubtitle"><b>Users:</b> 0 - 10</p>
+
+              <div className="priceSection">
+                <span className="currency">USD</span>
+                <span className="price">0</span>
+              </div>
+              
+              <button 
+                className="planButton secondary"
+                onClick={handlePricingButtonClick}
+              >
+                Start Free
+              </button>
+              
+              <div className="featuresList">
+                <div className="feature">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  Up to 10 maintenance requests/month
+                </div>
+                <div className="feature">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  Basic AI analysis
+                </div>
+                <div className="feature">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  Email notifications
+                </div>
+                <div className="feature">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  Mobile app access
+                </div>
+              </div>
             </div>
 
-            <div className="institutionCard">
-              <div className="institutionIcon">🏘️</div>
-              <h3 className="institutionTitle">Gated Communities</h3>
-              <p className="institutionDesc">
-                Streamline resident requests and maintain common areas efficiently.
-              </p>
+            <div className="pricingCard featured">
+              <div className="popularBadge">Most Popular</div>
+              <div className="planIcon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                </svg>
+              </div>
+              <h3 className="planTitle">Professional</h3>
+              <p className="planSubtitle"><b>Users:</b> 10 - 150</p>
+
+              <div className="priceSection">
+                <span className="currency">USD</span>
+                <span className="price">10</span>
+                <span className="period">/month</span>
+              </div>
+              
+              <button 
+                className="planButton primary"
+                onClick={handlePricingButtonClick}
+              >
+                Get Professional
+              </button>
+              
+              <div className="featuresList">
+                <div className="feature">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  Everything in Starter, plus:
+                </div>
+                <div className="feature">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  Unlimited maintenance requests
+                </div>
+                <div className="feature">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  Advanced AI prioritization
+                </div>
+                <div className="feature">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  Real-time technician tracking
+                </div>
+                <div className="feature">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  Analytics dashboard
+                </div>
+              </div>
             </div>
 
-            <div className="institutionCard">
-              <div className="institutionIcon">🏨</div>
-              <h3 className="institutionTitle">Hostels & Housing</h3>
-              <p className="institutionDesc">
-                Ensure quick resolution of maintenance issues in shared living spaces.
-              </p>
-            </div>
+            <div className="pricingCard">
+              <div className="planIcon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+              </div>
+              <h3 className="planTitle">Enterprise</h3>
+              <p className="planSubtitle"><b>Users :</b> 150 +</p>
 
-            <div className="institutionCard">
-              <div className="institutionIcon">🏢</div>
-              <h3 className="institutionTitle">Corporate Offices</h3>
-              <p className="institutionDesc">
-                Maintain professional work environments with minimal downtime.
-              </p>
+              <div className="priceSection">
+                <span className="customPrice">Custom</span>
+              </div>
+              
+              <button 
+                className="planButton secondary"
+                onClick={handlePricingButtonClick}
+              >
+                Contact Sales
+              </button>
+              
+              <div className="featuresList">
+                <div className="feature">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  Everything in Professional, plus:
+                </div>
+                <div className="feature">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  Multi-location management
+                </div>
+                <div className="feature">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  Custom integrations
+                </div>
+                <div className="feature">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  Dedicated support
+                </div>
+                <div className="feature">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  SLA guarantees
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -207,7 +343,9 @@ const Home = ({ onSigninClick, onSignupClick }) => {
   <div className="sectionContainer">
     <div className="footerContent">
       <div className="footerBrand">
-        <div className="logo">MaintenanceAI</div>
+                <div className="logo">
+          <span className='black1234'>Maint<span className='green123'>ai</span>nance</span> 
+        </div>
       </div>
       <div className="footerLinks">
         <a href="#features" className="footerLink">About</a>

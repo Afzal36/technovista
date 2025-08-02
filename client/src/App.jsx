@@ -8,6 +8,7 @@ import WorkerDashboard from "./components/Worker/WorkerDashboard";
 import Home from "./components/Home/Home";
 import ReportIssue from "./components/User/ReportIssue";
 import SubscriptionPlans from "./components/Admin/AdminPaymentPage";
+import "./App.css";
 
 const getDashboardComponent = (role) => {
   switch (role) {
@@ -94,7 +95,7 @@ const App = () => {
           element={
             <ProtectedRoute isAuth={isAuth}>
               {getDashboardComponent(userRole)}
-              <button onClick={handleLogout}>Logout</button>
+              <button onClick={handleLogout} className="logout-btn">Logout</button>
             </ProtectedRoute>
           }
         />
