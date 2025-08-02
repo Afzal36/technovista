@@ -23,7 +23,7 @@ router.post('/minimal-report', async (req, res) => {
       label,
       category,
       assignedTo = null, // Optional in request
-      status = false     // Optional in request
+      status     // Optional in request
     } = req.body;
 
     const report = new MinimalIssueReport({

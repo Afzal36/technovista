@@ -165,13 +165,18 @@ const ReportIssue = () => {
         if (!structuredData || typeof structuredData !== 'object') {
           structuredData = {};
         }
+        // Remove status if present (Gemini may return it)
+        if ('status' in structuredData) {
+          delete structuredData.status;
+        }
         // Flatten payload to ensure all required fields are at the root
         const payload = {
           email,
           phone: structuredData.phone,
           address: structuredData.address,
           label: structuredData.label,
-          category: structuredData.category,
+          category: structuredData.category
+          // Do NOT send status, let backend use default
         };
         console.log('Payload to send:', payload);
         try {
