@@ -2,6 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const MinimalIssueReport = require('../models/MinimalIssueReport');
+const { getIO } = require('../socket');
+
 
 // GET /api/issues/minimal-report
 router.get('/minimal-report', async (req, res) => {
@@ -57,16 +59,39 @@ router.get('/minimal-report', async (req, res) => {
 router.patch('/minimal-report/:id', async (req, res) => {
   try {
     const { status, assignedTo } = req.body;
+
     const report = await MinimalIssueReport.findByIdAndUpdate(
       req.params.id,
       { status, assignedTo },
       { new: true }
     );
+
     if (!report) return res.status(404).json({ error: "Report not found" });
+
+    // Emit socket message to both technician and user
+    const io = getIO();
+    const userSocketId = io.userSocketMap.get(report.email);
+    const technicianSocketId = io.userSocketMap.get(assignedTo);
+
+    if (userSocketId) {
+      io.to(userSocketId).emit("chat_started", {
+        with: assignedTo,
+        reportId: report._id
+      });
+    }
+
+    if (technicianSocketId) {
+      io.to(technicianSocketId).emit("chat_started", {
+        with: report.email,
+        reportId: report._id
+      });
+    }
+
     res.json(report);
   } catch (err) {
     res.status(500).json({ error: 'Failed to update report', details: err.message });
   }
 });
+
 
 module.exports = router;

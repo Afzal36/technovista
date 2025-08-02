@@ -1,13 +1,26 @@
 import React, { useEffect, useState } from "react";
 import "./WorkerDashboard.css";
+import socket from "../../socket"; // your client socket.io instance
+import ChatBox from "../Chat/ChatBox"; // chat component you'll create
+
 
 function WorkerDashboard() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("assigned"); // "assigned" or "all"
+  const [activeChatEmail, setActiveChatEmail] = useState(null); // user email to chat with
 
   // Get logged-in worker info from localStorage
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  useEffect(() => {
+    if (user && user.email) {
+      socket.emit("join-room", { email: user.email });
+    }
+  }, [user.email]);
+
+
+  // Get logged-in worker info from localStorage
   const workerField = user.field ? user.field.toLowerCase() : "";
 
   // Map worker field to report category
@@ -42,31 +55,33 @@ function WorkerDashboard() {
   }, [workerCategory]);
 
   // Accept a report: set status to "progress" and assignedTo to worker name
-  const handleAcceptReport = async (reportId) => {
-    try {
-      const res = await fetch(`http://localhost:5000/api/issues/minimal-report/${reportId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status: "progress",
-          assignedTo: user.name
-        })
-      });
-      if (res.ok) {
-        setReports((prev) =>
-          prev.map((r) =>
-            r._id === reportId
-              ? { ...r, status: "progress", assignedTo: user.name }
-              : r
-          )
-        );
-      } else {
-        alert("Failed to accept report");
-      }
-    } catch (err) {
-      alert("Error: " + err.message);
+  const handleAcceptReport = async (reportId, userEmail) => {
+  try {
+    const res = await fetch(`http://localhost:5000/api/issues/minimal-report/${reportId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status: "progress",
+        assignedTo: user.name
+      })
+    });
+    if (res.ok) {
+      setReports((prev) =>
+        prev.map((r) =>
+          r._id === reportId
+            ? { ...r, status: "progress", assignedTo: user.name }
+            : r
+        )
+      );
+      setActiveChatEmail(userEmail); // ⬅️ Trigger chat
+    } else {
+      alert("Failed to accept report");
     }
-  };
+  } catch (err) {
+    alert("Error: " + err.message);
+  }
+};
+
 
   // Filter reports based on selected filter
   const displayedReports =
@@ -132,7 +147,7 @@ function WorkerDashboard() {
               {report.status === "none" && (
                 <button
                   className="worker-accept-btn"
-                  onClick={() => handleAcceptReport(report._id)}
+                  onClick={() => handleAcceptReport(report._id, report.email)}
                 >
                   Accept Report
                 </button>
@@ -143,6 +158,11 @@ function WorkerDashboard() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Show chat box when a report is accepted */}
+      {activeChatEmail && (
+        <ChatBox myEmail={user.email} targetEmail={activeChatEmail} />
       )}
     </div>
   );

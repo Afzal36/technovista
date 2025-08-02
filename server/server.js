@@ -4,6 +4,8 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const admin = require("firebase-admin");
 const axios = require('axios');
+const http = require("http");
+const socketIo = require("socket.io");
 
 // Route imports
 const imageClassifierRoute = require("./routes/imageClassifier");
@@ -12,16 +14,63 @@ const adminActions = require('./routes/adminactions');
 const technicianRoutes = require("./routes/technicianRoutes");
 const authRoute = require("./routes/auth");
 const minimalReportRoutes = require('./routes/minimalReport');
-<<<<<<< HEAD
 const emailRoute=require('../server/routes/nodemailer')
-=======
-const issueReportRoutes = require('./routes/issueReports'); 
->>>>>>> 3080fd86640217771fe940321411a1b6442a52e7
 
 dotenv.config();
 
+const { initIO } = require('./socket');
 
 const app = express();
+const server = http.createServer(app);
+
+const io = socketIo(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST", "PATCH"]
+  }
+});
+initIO(io);
+
+const connectedUsers = new Map();
+
+io.on("connection", (socket) => {
+  console.log("New connection:", socket.id);
+
+  // Join room by email
+  socket.on("join-room", ({ email }) => {
+    if (email) {
+      connectedUsers.set(email, socket.id);
+      socket.join(email); // Join a room named by email
+      console.log(`User ${email} joined room and registered with socket ${socket.id}`);
+    }
+  });
+
+  // Handle sending message
+  socket.on("send-message", ({ sender, receiver, message }) => {
+    const receiverSocket = connectedUsers.get(receiver);
+    if (receiverSocket) {
+      io.to(receiverSocket).emit("receive-message", { sender, message });
+    }
+    // Also emit to sender for echo
+    socket.emit("receive-message", { sender, message });
+  });
+
+  socket.on("disconnect", () => {
+    for (let [email, socketId] of connectedUsers.entries()) {
+      if (socketId === socket.id) {
+        connectedUsers.delete(email);
+        break;
+      }
+    }
+    console.log("Socket disconnected:", socket.id);
+  });
+});
+
+app.set("socketio", io);
+
+
+
+
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -32,7 +81,7 @@ mongoose.connect(process.env.MONGO_URI, {
   console.log("✅ MongoDB connected");
   // Start server only after DB is connected
   const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 })
 .catch((err) => {
   console.error("❌ MongoDB connection error:", err);
@@ -315,8 +364,4 @@ app.use('/api/admin', adminActions);
 app.use("/api/image", imageClassifierRoute);
 app.use("/api/users", userRoutes);
 app.use('/api/issues', minimalReportRoutes);
-<<<<<<< HEAD
 app.use('/api/send-mail', emailRoute);
-=======
-app.use('/api/reports', issueReportRoutes);
->>>>>>> 3080fd86640217771fe940321411a1b6442a52e7
