@@ -1,4 +1,85 @@
+// Fixed Helper to send invoice email with PDF
+const sendInvoiceEmail = async (pdfBlob, paymentAmount, paymentPurpose, setError) => {
+  try {
+    console.log('📨 Preparing to send invoice email...');
+    
+    // Always get user email from 'user' object in localStorage
+    const userData = localStorage.getItem('user');
+    let userEmail = null;
+    if (userData) {
+      try {
+        const parsedUserData = JSON.parse(userData);
+        userEmail = parsedUserData.email;
+        console.log('📧 Found user email in userData:', userEmail);
+      } catch (parseError) {
+        console.error('❌ Error parsing userData from localStorage:', parseError);
+      }
+    }
+    // Final validation
+    if (!userEmail) {
+      const errorMsg = 'User email not found in localStorage. Please ensure user is logged in.';
+      console.error('❌', errorMsg);
+      setError && setError(errorMsg);
+      return false;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userEmail)) {
+      const errorMsg = 'Invalid email format found in localStorage';
+      console.error('❌', errorMsg);
+      setError && setError(errorMsg);
+      return false;
+    }
+
+    console.log('📧 Sending invoice to:', userEmail);
+
+    // Create FormData
+    const formData = new FormData();
+    formData.append('email', userEmail);
+    formData.append('text', `Thank you for your payment of $${paymentAmount} for "${paymentPurpose}". Please find your invoice attached.`);
+    formData.append('pdf', new File([pdfBlob], `invoice_${Date.now()}.pdf`, { 
+      type: 'application/pdf' 
+    }));
+
+    console.log('📤 Sending request to server...');
+
+    // Send request
+    const res = await fetch('http://localhost:5000/api/send-mail/send-email', {
+      method: 'POST',
+      body: formData,
+    });
+
+    console.log('📡 Server response status:', res.status);
+
+    let responseData;
+    try {
+      responseData = await res.json();
+      console.log('📄 Server response:', responseData);
+    } catch (jsonError) {
+      console.error('❌ Error parsing server response:', jsonError);
+      throw new Error('Invalid server response format');
+    }
+
+    if (!res.ok) {
+      throw new Error(responseData.message || `Server error: ${res.status}`);
+    }
+
+    console.log('✅ Invoice email sent successfully!');
+    alert('Invoice email sent successfully to: ' + userEmail);
+    return true;
+    
+  } catch (err) {
+    console.error('❌ Error sending invoice email:', err);
+    const errorMessage = `Failed to send invoice email: ${err.message}`;
+    setError && setError(errorMessage);
+    alert(errorMessage); // Also show alert for immediate feedback
+    return false;
+  }
+};
+
 import React, { useEffect, useState, useRef } from 'react';
+import './AdminPaymentPage.css';
 
 const AdminPaymentPage = () => {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -6,8 +87,9 @@ const AdminPaymentPage = () => {
   const [loading, setLoading] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [paymentAmount, setPaymentAmount] = useState(10);
-  const [paymentPurpose, setPaymentPurpose] = useState('Child Welfare & Education Donation');
+  const [paymentPurpose, setPaymentPurpose] = useState('Payment for Maintenance Platform Usage');
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [emailSending, setEmailSending] = useState(false);
   const invoiceRef = useRef();
   const paypalButtonRef = useRef();
 
@@ -21,11 +103,75 @@ const AdminPaymentPage = () => {
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
         script.async = true;
+        script.onload = () => {
+          console.log('✅ html2pdf library loaded successfully');
+        };
+        script.onerror = () => {
+          console.error('❌ Failed to load html2pdf library');
+          setError('Failed to load PDF generation library');
+        };
         document.head.appendChild(script);
       }
     };
     loadHtml2PdfScript();
   }, []);
+
+  // Function to generate PDF and send email
+  const generatePDFAndSendEmail = async (paymentDetails) => {
+    try {
+      console.log('🔄 Starting PDF generation and email sending process...');
+      setEmailSending(true);
+      
+      // Wait a bit to ensure the invoice is rendered
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const element = invoiceRef.current;
+      if (!element) {
+        throw new Error('Invoice element not found');
+      }
+
+      if (!window.html2pdf) {
+        throw new Error('PDF library not loaded. Please refresh and try again.');
+      }
+
+      const options = {
+        margin: [0.2, 0.5, 0.5, 0.5], // [top, right, bottom, left] - reduced top margin
+        filename: `invoice_${paymentDetails?.id?.slice(-8) || Date.now()}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          allowTaint: true, 
+          backgroundColor: '#FAF7F2' 
+        },
+        jsPDF: { 
+          unit: 'in', 
+          format: 'letter', 
+          orientation: 'portrait' 
+        }
+      };
+
+      console.log('🔄 Generating PDF...');
+      const pdfBlob = await window.html2pdf().set(options).from(element).outputPdf('blob');
+      
+      console.log('✅ PDF generated successfully');
+      
+      // Send the email with PDF attachment
+      const emailSent = await sendInvoiceEmail(pdfBlob, paymentAmount, paymentPurpose, setError);
+      
+      if (emailSent) {
+        console.log('✅ Email sent successfully');
+      } else {
+        console.log('❌ Email sending failed');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error in PDF generation or email sending:', error);
+      setError(`Failed to generate PDF or send email: ${error.message}`);
+    } finally {
+      setEmailSending(false);
+    }
+  };
 
   useEffect(() => {
     // Don't load PayPal if payment is already successful
@@ -159,6 +305,12 @@ const AdminPaymentPage = () => {
                 paypalButtonRef.current.innerHTML = '';
               }
               
+              // Generate PDF and send email after payment success
+              console.log("🔄 Starting PDF generation and email sending...");
+              setTimeout(() => {
+                generatePDFAndSendEmail(details);
+              }, 1500); // Wait a bit longer to ensure UI is updated
+              
             } catch (error) {
               console.error("❌ Error capturing payment:", error);
               setError(`Payment failed: ${error.message}`);
@@ -207,9 +359,8 @@ const AdminPaymentPage = () => {
 
   const downloadPDF = async () => {
     try {
-      console.log("🔄 Generating PDF...");
+      console.log("🔄 Generating PDF for download...");
       
-      // Check if html2pdf is available
       if (!window.html2pdf) {
         throw new Error("PDF library not loaded. Please refresh and try again.");
       }
@@ -218,16 +369,16 @@ const AdminPaymentPage = () => {
       if (!element) {
         throw new Error("Invoice element not found");
       }
-
+      
       const options = {
-        margin: 0.5,
+        margin: [0.2, 0.5, 0.5, 0.5], // [top, right, bottom, left] - reduced top margin
         filename: `invoice_${paymentDetails?.id?.slice(-8) || Date.now()}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
           scale: 2, 
           useCORS: true,
           allowTaint: true,
-          backgroundColor: '#ffffff'
+          backgroundColor: '#FAF7F2'
         },
         jsPDF: { 
           unit: 'in', 
@@ -236,12 +387,19 @@ const AdminPaymentPage = () => {
         }
       };
       
+      // Generate and download PDF
       await window.html2pdf().set(options).from(element).save();
-      console.log("✅ PDF generated successfully");
+      console.log("✅ PDF downloaded successfully");
       
     } catch (error) {
       console.error("❌ Error generating PDF:", error);
       setError(`Failed to generate PDF: ${error.message}`);
+    }
+  };
+
+  const resendEmail = async () => {
+    if (paymentDetails) {
+      await generatePDFAndSendEmail(paymentDetails);
     }
   };
 
@@ -251,6 +409,7 @@ const AdminPaymentPage = () => {
     setPaymentDetails(null);
     setError(null);
     setLoading(false);
+    setEmailSending(false);
     setIsScriptLoaded(false);
     
     // Clear PayPal button container
@@ -262,61 +421,108 @@ const AdminPaymentPage = () => {
   // Test payment success (for debugging)
   const testPaymentSuccess = () => {
     console.log("🧪 Testing payment success state");
-    setPaymentDetails({
+    const testDetails = {
       id: "TEST123456789", 
       status: "COMPLETED"
-    });
+    };
+    setPaymentDetails(testDetails);
     setPaymentSuccess(true);
     setError(null);
     setLoading(false);
+    
+    // Also test email sending
+    setTimeout(() => {
+      generatePDFAndSendEmail(testDetails);
+    }, 1000);
+  };
+
+  // Get user email for display
+  const getUserEmail = () => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const parsedUserData = JSON.parse(userData);
+        return parsedUserData.email || 'No email found';
+      } catch (error) {
+        console.error('Error parsing userData:', error);
+      }
+    }
+    return 'No email found';
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="admin-payment-container">
+      <div className="admin-payment-wrapper">
         {/* Admin Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">Admin Payment Management</h1>
-              <p className="text-gray-600">Process payments and generate invoices</p>
-              <div className="text-xs text-blue-600 mt-1">PayPal Sandbox Mode Active</div>
+        <div className="admin-header-card">
+          <div className="admin-header-content">
+            <div className="admin-header-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+            <div className="admin-header-text">
+              <h1 className="admin-title">Maintenance Platform Payment</h1>
+              <p className="admin-subtitle">Process platform usage fees and generate invoices</p>
+              <div className="sandbox-badge">PayPal Sandbox Mode Active</div>
+              <div className="user-email-display">Email: {getUserEmail()}</div>
+            </div>
+          </div>
           
           {/* Debug Button - Remove in production */}
           <button
             onClick={testPaymentSuccess}
-            className="mt-2 px-3 py-1 bg-yellow-500 text-white text-sm rounded hover:bg-yellow-600"
+            className="debug-button"
           >
-            🧪 Test Success State
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 12l2 2 4-4"/>
+              <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9c2.23 0 4.26.82 5.82 2.18"/>
+            </svg>
+            Test Success State
           </button>
         </div>
 
         {/* Payment Configuration */}
         {!paymentSuccess && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Payment Configuration</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="config-card">
+            <h2 className="config-title">Payment Configuration</h2>
+            <div className="config-grid">
+              <div className="form-group">
+                <label className="form-label">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 1v22"/>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                  </svg>
                   Payment Amount ($)
                 </label>
                 <input
                   type="number"
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="form-input"
                   min="1"
                   step="0.01"
                   disabled={loading}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="form-group">
+                <label className="form-label">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14,2 14,8 20,8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10,9 9,9 8,9"/>
+                  </svg>
                   Payment Purpose
                 </label>
                 <input
                   type="text"
                   value={paymentPurpose}
                   onChange={(e) => setPaymentPurpose(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="form-input"
                   disabled={loading}
                 />
               </div>
@@ -326,49 +532,61 @@ const AdminPaymentPage = () => {
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center">
-              <span className="text-red-500 text-xl mr-2">❌</span>
+          <div className="alert alert-error">
+            <div className="alert-content">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
               <div>
-                <span className="text-red-700 font-medium">Error: </span>
-                <span className="text-red-600">{error}</span>
+                <span className="alert-title">Error: </span>
+                <span className="alert-message">{error}</span>
               </div>
             </div>
           </div>
         )}
 
         {/* Loading Display */}
-        {loading && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500 mr-3"></div>
-              <span className="text-blue-700">Processing payment...</span>
+        {(loading || emailSending) && (
+          <div className="alert alert-loading">
+            <div className="alert-content">
+              <div className="loading-spinner"></div>
+              <span className="alert-message">
+                {emailSending ? 'Sending invoice email...' : 'Processing payment...'}
+              </span>
             </div>
           </div>
         )}
 
         {/* Payment Form */}
         {!paymentSuccess ? (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Process Payment - ${paymentAmount.toFixed(2)}
-            </h2>
+          <div className="payment-card">
+            <div className="payment-header">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                <line x1="1" y1="10" x2="23" y2="10"/>
+              </svg>
+              <h2 className="payment-title">
+                Process Payment - ${paymentAmount.toFixed(2)}
+              </h2>
+            </div>
             
             {!isScriptLoaded && !error && (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>
-                <span className="text-gray-600">Loading PayPal Sandbox...</span>
+              <div className="paypal-loading">
+                <div className="loading-spinner"></div>
+                <span>Loading PayPal Sandbox...</span>
               </div>
             )}
             
-            <div ref={paypalButtonRef} id="paypal-button-container" className="min-h-[200px]"></div>
+            <div ref={paypalButtonRef} className="paypal-container"></div>
             
             {!isScriptLoaded && error && (
-              <div className="text-center py-4">
-                <div className="text-red-600 mb-2">{error}</div>
+              <div className="paypal-error">
+                <div className="paypal-error-message">{error}</div>
                 <button
                   onClick={() => window.location.reload()}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  className="retry-button"
                 >
                   Retry Loading PayPal Sandbox
                 </button>
@@ -377,116 +595,151 @@ const AdminPaymentPage = () => {
           </div>
         ) : (
           /* Success State with Invoice */
-          <div className="space-y-6">
+          <div className="success-container">
             {/* Success Message */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-              <h2 className="text-2xl font-bold text-green-800 mb-2">✅ Payment Successful!</h2>
-              <p className="text-green-700">Payment has been processed successfully.</p>
-              <p className="text-green-600 text-sm mt-2">
+            <div className="success-card">
+              <div className="success-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22,4 12,14.01 9,11.01"/>
+                </svg>
+              </div>
+              <h2 className="success-title">Payment Successful!</h2>
+              <p className="success-message">Payment has been processed successfully.</p>
+              <p className="success-transaction">
                 Transaction ID: {paymentDetails?.id || 'N/A'}
               </p>
+              {emailSending && (
+                <p className="email-status">📧 Sending invoice email...</p>
+              )}
             </div>
 
             {/* Admin Actions */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-gray-800">Admin Actions</h3>
+            <div className="actions-card">
+              <div className="actions-header">
+                <h3 className="actions-title">Admin Actions</h3>
                 <button
                   onClick={resetPayment}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+                  className="secondary-button"
+                  disabled={emailSending}
                 >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="1,4 1,10 7,10"/>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                  </svg>
                   Process Another Payment
                 </button>
               </div>
-              <button
-                onClick={downloadPDF}
-                className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center"
-              >
-                📄 Download PDF Invoice
-              </button>
+              <div className="actions-buttons">
+                <button
+                  onClick={downloadPDF}
+                  className="primary-button"
+                  disabled={emailSending}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14,2 14,8 20,8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10,9 9,9 8,9"/>
+                  </svg>
+                  Download PDF Invoice
+                </button>
+                <button
+                  onClick={resendEmail}
+                  className="secondary-button"
+                  disabled={emailSending}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                  </svg>
+                  Resend Email
+                </button>
+              </div>
             </div>
 
-            {/* Invoice Preview */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Invoice Preview</h3>
+            {/* Invoice Preview - Updated with Better Design */}
+            <div className="invoice-preview-card">
+              <h3 className="invoice-preview-title">Invoice Preview</h3>
               
-              {/* Invoice Component */}
-              <div ref={invoiceRef} className="max-w-2xl mx-auto bg-gray-50 text-gray-800 rounded-2xl shadow-lg border border-gray-200 font-sans overflow-hidden">
+              {/* Updated Invoice Component with Better UI */}
+              <div ref={invoiceRef} className="invoice-container">
                 {/* Header */}
-                <div className="flex items-center justify-between bg-gradient-to-r from-blue-700 to-blue-500 px-8 py-6 border-b-4 border-blue-800">
-                  <div className="flex items-center">
-                    <div className="w-16 h-16 rounded-lg bg-white p-1 mr-5 shadow flex items-center justify-center">
-                      <span className="text-blue-600 font-bold text-lg">IWCWT</span>
+                <div className="invoice-header">
+                  <div className="invoice-header-left">
+                    <div className="invoice-logo">
+                      <span>IWCWT</span>
                     </div>
-                    <div>
-                      <div className="text-white font-bold text-2xl tracking-wide">PAYMENT INVOICE</div>
-                      <div className="text-blue-100 text-base font-medium">Transaction Receipt</div>
+                    <div className="invoice-header-text">
+                      <div className="invoice-title-main">PAYMENT INVOICE</div>
+                      <div className="invoice-subtitle">Transaction Receipt</div>
                     </div>
                   </div>
-                  <div className="text-right text-white">
-                    <div className="font-semibold text-lg">IWCWT Ministry</div>
-                    <div className="text-sm">info@iwcwtministry.org</div>
-                    <div className="text-sm">India</div>
+                  <div className="invoice-header-right">
+                    <div className="company-name">IWCWT Ministry</div>
+                    <div className="company-email">info@iwcwtministry.org</div>
+                    <div className="company-location">India</div>
                   </div>
                 </div>
 
                 {/* Customer & Invoice Details */}
-                <div className="flex justify-between px-8 pt-6 bg-white">
-                  <div>
-                    <div className="text-gray-500 font-medium text-sm">Customer</div>
-                    <div className="font-semibold text-base mt-1">John Doe</div>
-                    <div className="text-sm">sb-kqsfq43674007@personal.example.com</div>
-                    <div className="text-sm">US</div>
+                <div className="invoice-details">
+                  <div className="customer-details">
+                    <div className="detail-label">Customer</div>
+                    <div className="customer-name">John Doe</div>
+                    <div className="customer-email">{getUserEmail()}</div>
+                    <div className="customer-location">US</div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-gray-500 font-medium text-sm">Invoice #</div>
-                    <div className="font-semibold text-base mt-1">{paymentDetails?.id?.slice(-8) || 'TEST1234'}</div>
-                    <div className="text-gray-500 font-medium text-sm mt-3">Date</div>
-                    <div className="font-semibold text-base mt-1">{new Date().toLocaleDateString()}</div>
+                  <div className="invoice-meta">
+                    <div className="detail-label">Invoice #</div>
+                    <div className="invoice-number">{paymentDetails?.id?.slice(-8) || 'TEST1234'}</div>
+                    <div className="detail-label invoice-date-label">Date</div>
+                    <div className="invoice-date">{new Date().toLocaleDateString()}</div>
                   </div>
                 </div>
 
                 {/* Payment Details Table */}
-                <div className="bg-white px-8">
-                  <table className="w-full mt-6 mb-2 text-base">
+                <div className="invoice-table-container">
+                  <table className="invoice-table">
                     <thead>
-                      <tr className="bg-blue-50">
-                        <th className="text-left py-3 px-2 font-semibold text-blue-700 border-b border-blue-100">Description</th>
-                        <th className="text-right py-3 px-2 font-semibold text-blue-700 border-b border-blue-100">Amount</th>
+                      <tr>
+                        <th>Description</th>
+                        <th>Amount</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr className="odd:bg-gray-50 even:bg-white">
-                        <td className="py-3 px-2 border-b border-gray-100">{paymentPurpose}</td>
-                        <td className="text-right py-3 px-2 border-b border-gray-100">${paymentAmount.toFixed(2)} USD</td>
+                      <tr>
+                        <td>{paymentPurpose}</td>
+                        <td>${paymentAmount.toFixed(2)} USD</td>
                       </tr>
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td className="py-3 px-2 text-right font-bold bg-blue-50 border-t border-blue-100">Total:</td>
-                        <td className="text-right py-3 px-2 font-bold bg-blue-50 border-t border-blue-100">${paymentAmount.toFixed(2)} USD</td>
+                        <td>Total:</td>
+                        <td>${paymentAmount.toFixed(2)} USD</td>
                       </tr>
                     </tfoot>
                   </table>
                 </div>
 
                 {/* Transaction Info */}
-                <div className="flex justify-between items-center bg-white px-8 pt-2 pb-1 text-sm">
-                  <div>
-                    <div><span className="font-semibold">Transaction ID:</span> {paymentDetails?.id || 'TEST123456789'}</div>
-                    <div><span className="font-semibold">Status:</span> {paymentDetails?.status || 'COMPLETED'}</div>
-                    <div><span className="font-semibold">Processed:</span> {new Date().toLocaleString()}</div>
+                <div className="transaction-info">
+                  <div className="transaction-details">
+                    <div><span>Transaction ID:</span> {paymentDetails?.id || 'TEST123456789'}</div>
+                    <div><span>Status:</span> {paymentDetails?.status || 'COMPLETED'}</div>
+                    <div><span>Processed:</span> {new Date().toLocaleString()}</div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-gray-500 font-medium">Payment Method</div>
-                    <div className="font-semibold text-blue-700">PayPal</div>
+                  <div className="payment-method">
+                    <div className="method-label">Payment Method</div>
+                    <div className="method-value">PayPal</div>
                   </div>
                 </div>
 
                 {/* Footer */}
-                <div className="bg-blue-50 px-8 py-5 rounded-b-2xl mt-2 text-gray-700 text-center">
-                  <div className="font-semibold text-lg text-blue-700 mb-1">Thank you for your payment!</div>
-                  <div className="italic text-sm">This receipt confirms your payment transaction. Please keep this for your records.</div>
+                <div className="invoice-footer">
+                  <div className="footer-title">Thank you for your payment!</div>
+                  <div className="footer-message">This receipt confirms your payment transaction. Please keep this for your records.</div>
                 </div>
               </div>
             </div>

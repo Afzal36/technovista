@@ -149,25 +149,47 @@ const ReportIssue = () => {
       // Show success animation and reset form if successful
       if (response.ok) {
         // Send to Gemini API for structured data generation
-        const structuredData = await sendToGemini(data);
-        if (structuredData) {
-          try {
-            const postRes = await fetch('http://localhost:5000/api/issues/minimal-report', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(structuredData),
-            });
-            if (!postRes.ok) {
-              const postErr = await postRes.text();
-              console.error('Error posting minimal report:', postErr);
-            } else {
-              console.log('Minimal report posted successfully');
-            }
-          } catch (err) {
-            console.error('Network error posting minimal report:', err);
+        let structuredData = await sendToGemini(data);
+        // Get email from localStorage user item
+        let email = '';
+        try {
+          const userStr = localStorage.getItem('user');
+          if (userStr) {
+            const userObj = JSON.parse(userStr);
+            email = userObj.email || '';
+            console.log('Email to send:', email);
           }
+        } catch (e) {
+          console.error('Error parsing user from localStorage:', e);
+        }
+        if (!structuredData || typeof structuredData !== 'object') {
+          structuredData = {};
+        }
+        // Flatten payload to ensure all required fields are at the root
+        const payload = {
+          email,
+          phone: structuredData.phone,
+          address: structuredData.address,
+          label: structuredData.label,
+          category: structuredData.category,
+        };
+        console.log('Payload to send:', payload);
+        try {
+          const postRes = await fetch('http://localhost:5000/api/issues/minimal-report', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          });
+          if (!postRes.ok) {
+            const postErr = await postRes.text();
+            console.error('Error posting minimal report:', postErr);
+          } else {
+            console.log('Minimal report posted successfully');
+          }
+        } catch (err) {
+          console.error('Network error posting minimal report:', err);
         }
         setShowSuccess(true); // Show success animation
         setTimeout(() => {
