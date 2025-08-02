@@ -35,7 +35,26 @@ router.post('/minimal-report', async (req, res) => {
 router.get('/minimal-report', async (req, res) => {
   try {
     const reports = await MinimalIssueReport.find().sort({ reportedAt: -1 });
-    res.json(reports);
+    // Lookup technician email for each report
+    const Technician = require('../models/Technician');
+    const reportsWithEmail = await Promise.all(reports.map(async (report) => {
+      let assignedToEmail = null;
+      if (report.assignedTo) {
+        // Try lookup by name
+        let tech = await Technician.findOne({ name: report.assignedTo });
+        // If not found, try by _id
+        if (!tech && mongoose.Types.ObjectId.isValid(report.assignedTo)) {
+          tech = await Technician.findById(report.assignedTo);
+        }
+        // If not found, try by email
+        if (!tech && /^\S+@\S+\.\S+$/.test(report.assignedTo)) {
+          tech = await Technician.findOne({ mail: report.assignedTo });
+        }
+        assignedToEmail = tech ? tech.mail : null;
+      }
+      return { ...report.toObject(), assignedToEmail };
+    }));
+    res.json(reportsWithEmail);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch reports', details: err.message });
   }

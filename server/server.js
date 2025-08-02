@@ -14,7 +14,9 @@ const adminActions = require('./routes/adminactions');
 const technicianRoutes = require("./routes/technicianRoutes");
 const authRoute = require("./routes/auth");
 const minimalReportRoutes = require('./routes/minimalReport');
+
 const emailRoute=require('../server/routes/nodemailer')
+const issueReportRoutes = require('./routes/issueReports'); 
 
 dotenv.config();
 
@@ -31,7 +33,9 @@ const io = socketIo(server, {
 });
 initIO(io);
 
-const connectedUsers = new Map();
+// Replace your socket connection handler in server with this:
+
+const connectedUsers = new Map(); // Keep this
 
 io.on("connection", (socket) => {
   console.log("New connection:", socket.id);
@@ -39,30 +43,46 @@ io.on("connection", (socket) => {
   // Join room by email
   socket.on("join-room", ({ email }) => {
     if (email) {
+      // Store the mapping
       connectedUsers.set(email, socket.id);
       socket.join(email); // Join a room named by email
+      socket.email = email; // Store email on socket for cleanup
       console.log(`User ${email} joined room and registered with socket ${socket.id}`);
+      console.log("Current connected users:", Array.from(connectedUsers.keys()));
     }
   });
 
-  // Handle sending message
+  // Handle sending message - FIXED VERSION
   socket.on("send-message", ({ sender, receiver, message }) => {
-    const receiverSocket = connectedUsers.get(receiver);
-    if (receiverSocket) {
-      io.to(receiverSocket).emit("receive-message", { sender, message });
+    console.log(`Message from ${sender} to ${receiver}: ${message}`);
+    
+    // Get receiver's socket ID
+    const receiverSocketId = connectedUsers.get(receiver);
+    
+    if (receiverSocketId) {
+      // Send to specific socket ID
+      io.to(receiverSocketId).emit("receive-message", { sender, message });
+      console.log(`✅ Message sent to ${receiver} (${receiverSocketId})`);
+    } else {
+      console.log(`❌ Receiver ${receiver} not found in connected users`);
+      console.log("Available users:", Array.from(connectedUsers.keys()));
     }
-    // Also emit to sender for echo
-    socket.emit("receive-message", { sender, message });
+    
+    // Echo back to sender (optional - remove if you handle this in frontend)
+    const senderSocketId = connectedUsers.get(sender);
+    if (senderSocketId && senderSocketId !== receiverSocketId) {
+      io.to(senderSocketId).emit("receive-message", { sender, message });
+    }
   });
 
   socket.on("disconnect", () => {
-    for (let [email, socketId] of connectedUsers.entries()) {
-      if (socketId === socket.id) {
-        connectedUsers.delete(email);
-        break;
-      }
+    // Clean up using stored email
+    if (socket.email) {
+      connectedUsers.delete(socket.email);
+      console.log(`User ${socket.email} disconnected`);
     }
     console.log("Socket disconnected:", socket.id);
+    console.log("Remaining connected users:", Array.from(connectedUsers.keys()));
   });
 });
 
@@ -365,3 +385,4 @@ app.use("/api/image", imageClassifierRoute);
 app.use("/api/users", userRoutes);
 app.use('/api/issues', minimalReportRoutes);
 app.use('/api/send-mail', emailRoute);
+app.use('/api/reports', issueReportRoutes);

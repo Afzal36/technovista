@@ -343,7 +343,9 @@ const Home = ({ onSigninClick, onSignupClick }) => {
   <div className="sectionContainer">
     <div className="footerContent">
       <div className="footerBrand">
-        <div className="logo">MaintenanceAI</div>
+                <div className="logo">
+          <span className='black1234'>Maint<span className='green123'>ai</span>nance</span> 
+        </div>
       </div>
       <div className="footerLinks">
         <a href="#features" className="footerLink">About</a>
