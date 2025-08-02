@@ -12,11 +12,10 @@ const adminActions = require('./routes/adminactions');
 const technicianRoutes = require("./routes/technicianRoutes");
 const authRoute = require("./routes/auth");
 const minimalReportRoutes = require('./routes/minimalReport');
-<<<<<<< HEAD
+
 const emailRoute=require('../server/routes/nodemailer')
-=======
+
 const issueReportRoutes = require('./routes/issueReports'); 
->>>>>>> 3080fd86640217771fe940321411a1b6442a52e7
 
 dotenv.config();
 
@@ -315,8 +314,7 @@ app.use('/api/admin', adminActions);
 app.use("/api/image", imageClassifierRoute);
 app.use("/api/users", userRoutes);
 app.use('/api/issues', minimalReportRoutes);
-<<<<<<< HEAD
+
 app.use('/api/send-mail', emailRoute);
-=======
+
 app.use('/api/reports', issueReportRoutes);
->>>>>>> 3080fd86640217771fe940321411a1b6442a52e7
