@@ -7,6 +7,8 @@ import torch
 import os
 import numpy as np
 import time
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -27,7 +29,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(MODEL_CACHE_DIR, exist_ok=True)
 
 # Hugging Face Token Configuration
-HF_TOKEN = os.getenv('HUGGINGFACE_HUB_TOKEN') or "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"
+HF_TOKEN = os.getenv('HUGGINGFACE_HUB_TOKEN')
+
 
 def authenticate_huggingface():
     """Authenticate with Hugging Face using token"""
@@ -325,7 +328,8 @@ if __name__ == "__main__":
         print("="*50)
         
         # Start server with debug mode for development
-        app.run(debug=True, host='0.0.0.0', port=5000)
+        port = int(os.environ.get("PORT", 5000))  # Get PORT from env, default 5000
+        app.run(debug=False, host='0.0.0.0', port=port)
     else:
         print("❌ Server cannot start - model failed to load")
         print("\n📋 Setup Instructions:")
