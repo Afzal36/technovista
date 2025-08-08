@@ -94,8 +94,7 @@ const AdminPaymentPage = () => {
   const paypalButtonRef = useRef();
 
   // Use PayPal Client ID from environment variable for sandbox mode
-  const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID || "AQBqkwAcPkjd8-7xR2UMsUtpUbXmfQViPs-ltoRj-T84ROkVtQJqy4Fojp4HR3rgm2nt4OGXQlD-6Hw_";
-
+  const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
   // Load html2pdf script
   useEffect(() => {
     const loadHtml2PdfScript = () => {
