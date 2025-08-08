@@ -335,7 +335,7 @@ const AdminPaymentPage = () => {
         })
         .catch((error) => {
           console.error("❌ Error rendering PayPal buttons:", error);
-          setError("Failed to render PayPal buttons");
+          // setError("Failed to render PayPal buttons");
         });
       }
     };

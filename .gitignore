@@ -1,1 +1,3 @@
-Flask-Backend
+/Flask-Backend/models/
+/Flask-Backend/static/
+/Flask-Backend/venv/

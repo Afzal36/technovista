@@ -634,7 +634,10 @@
 .footerLink:hover {
   color: var(--fresh-green);
 }
-
+.black1234{
+  color:var(--warm-beige);
+  font-weight: 700;
+}
 .footerBottom {
   padding-top: 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);

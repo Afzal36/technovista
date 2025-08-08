@@ -272,14 +272,15 @@ const ReportIssue = () => {
         <div className="form-group">
           <label className="form-label">
             Description
-            <textarea
+           
+          </label>
+           <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="description-input"
-              placeholder="Please describe the issue in detail... (optional)"
+              placeholder="Describe the Issue (optional)"
               rows={4}
             />
-          </label>
         </div>
 
         {/* Submit Button */}
