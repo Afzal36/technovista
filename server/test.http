@@ -1,0 +1,69 @@
+POST http://localhost:5000/api/technicians/register
+Content-Type: application/json
+
+{
+   {
+  "name": "Ravi Kumar",
+  "phno": "9876543210",
+  "mail": "ravi.kumar@example.com",
+  "pass": "Ravi@123",
+  "address": "Gulzar Houz, Hyderabad",
+  "field": "Electrician",
+  "aadhaarImage": "aadhaar_ravi.jpg",
+  "experience": 8
+  }
+}
+
+###
+GET http://localhost:5000/api/technicians/register
+
+
+###
+POST http://localhost:5000/api/admin/accept-technician/688ce46af933c376c0506587
+
+###
+POST http://localhost:5000/api/users/signup
+Content-Type: application/json
+
+{
+  "uid": "abc1234",
+  "email": "example1@email.com",
+  "password": "yourStrongPassword123",
+  "phone": "9876543210",
+  "name": "John Doe",
+  "role": "technician",
+  "field": "electrical"
+}
+
+###
+POST http://localhost:5000/api/technicians/login
+Content-Type: application/json
+
+{
+  "mail": "srikarjanjirala92@gmail.com",
+  "pass": "9a2216a5"
+}
+
+
+###
+POST http://localhost:5000/api/issues/minimal-report
+Content-Type: application/json
+
+{
+  "phone": "9876543210",
+  "address": "Sector 12, ABC Colony, Hyderabad",
+  "label": "A leaking pipe or plumbing issue",
+  "category": "plumber",
+  "assignedTo": "Technician A"
+}
+
+
+###
+post http://localhost:5000/api/reports/assigned
+Content-Type: application/json
+
+{
+  "assignedTo": "Technician A"
+}
+
+
