@@ -7,9 +7,6 @@ import torch
 import os
 import numpy as np
 import time
-from dotenv import load_dotenv
-load_dotenv()
-
 
 app = Flask(__name__)
 
@@ -26,13 +23,11 @@ CORS(app,
 
 UPLOAD_FOLDER = "static/uploads"
 MODEL_CACHE_DIR = "./models/clip-vit-base-patch32"
-
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(MODEL_CACHE_DIR, exist_ok=True)
 
 # Hugging Face Token Configuration
-HF_TOKEN = os.getenv('HUGGINGFACE_HUB_TOKEN')
-
+HF_TOKEN = os.getenv('HUGGINGFACE_HUB_TOKEN') or "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"
 
 def authenticate_huggingface():
     """Authenticate with Hugging Face using token"""
@@ -49,7 +44,6 @@ def authenticate_huggingface():
         return False
 
 def load_model_with_auth():
-    
     """Load CLIP model with Hugging Face authentication"""
     try:
         print("🔑 Authenticating with Hugging Face...")
@@ -66,23 +60,24 @@ def load_model_with_auth():
                 print("Loading model from local cache...")
                 model = CLIPModel.from_pretrained(MODEL_CACHE_DIR, local_files_only=True)
                 processor = CLIPProcessor.from_pretrained(MODEL_CACHE_DIR, local_files_only=True)
-
-
                 print("✅ Model loaded successfully from cache!")
                 return model, processor
             except Exception as e:
                 print(f"Failed to load from cache: {str(e)}")
                 print("Downloading fresh model...")
-                
-                
-
-
         
         # Download from Hugging Face
-        model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32",token=HF_TOKEN if HF_TOKEN else None,cache_dir=MODEL_CACHE_DIR)
-        processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32",token=HF_TOKEN if HF_TOKEN else None,cache_dir=MODEL_CACHE_DIR)
-
-
+        model = CLIPModel.from_pretrained(
+            "openai/clip-vit-base-patch32",
+            token=HF_TOKEN if HF_TOKEN else None,
+            cache_dir=MODEL_CACHE_DIR
+        )
+        processor = CLIPProcessor.from_pretrained(
+            "openai/clip-vit-base-patch32",
+            token=HF_TOKEN if HF_TOKEN else None,
+            cache_dir=MODEL_CACHE_DIR
+        )
+        
         # Save to local directory for future use
         try:
             model.save_pretrained(MODEL_CACHE_DIR)
@@ -330,8 +325,7 @@ if __name__ == "__main__":
         print("="*50)
         
         # Start server with debug mode for development
-        port = int(os.environ.get("PORT", 5000))  # Get PORT from env, default 5000
-        app.run(debug=False, host='0.0.0.0', port=port)
+        app.run(debug=True, host='0.0.0.0', port=5000)
     else:
         print("❌ Server cannot start - model failed to load")
         print("\n📋 Setup Instructions:")
