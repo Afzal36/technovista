@@ -1,3 +1,5 @@
 /Flask-Backend/models/
 /Flask-Backend/static/
 /Flask-Backend/venv/
+node_modules
+node_modules
