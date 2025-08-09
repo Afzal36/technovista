@@ -21,3 +21,9 @@ Thumbs.db
 # Build output
 dist/
 build/
+
+
+.env
+server/.env
+firebase.json
+server/firebase.json
