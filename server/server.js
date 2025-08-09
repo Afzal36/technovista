@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const admin = require("firebase-admin");
+//const admin = require("firebase-admin");
 const axios = require('axios');
 const http = require("http");
 const socketIo = require("socket.io");
@@ -131,11 +131,17 @@ if (!CLIENT || !SECRET) {
 }
 
 // Firebase Admin SDK Initialization
-const serviceAccount = require('../server/firebase.json');
+const admin = require('firebase-admin');
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+  }),
 });
+
+
 
 // PayPal Helper Functions
 const getAccessToken = async () => {
