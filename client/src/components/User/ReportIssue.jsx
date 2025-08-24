@@ -138,7 +138,7 @@ const ReportIssue = () => {
     }
 
     try {
-  const response = await fetch('https://technovista-nine.vercel.app/predict', {
+  const response = await fetch('https://technovista-backend.onrender.com/predict', {
         method: 'POST',
         body: formData,
       });
@@ -180,7 +180,7 @@ const ReportIssue = () => {
         };
         console.log('Payload to send:', payload);
         try {
-          const postRes = await fetch('https://technovista-nine.vercel.app/api/issues/minimal-report', {
+          const postRes = await fetch('https://technovista-backend.onrender.com/api/issues/minimal-report', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

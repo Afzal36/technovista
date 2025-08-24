@@ -229,7 +229,7 @@ const AdminPaymentPage = () => {
               setLoading(true);
               setError(null);
 
-              const res = await fetch("https://technovista-nine.vercel.app/create-order", {
+              const res = await fetch("https://technovista-backend.onrender.com/create-order", {
                 method: "POST",
                 headers: { 
                   "Content-Type": "application/json",
@@ -269,7 +269,7 @@ const AdminPaymentPage = () => {
               setLoading(true);
               setError(null);
 
-              const res = await fetch(`https://technovista-nine.vercel.app/capture-order/${data.orderID}`, {
+              const res = await fetch(`https://technovista-backend.onrender.com/capture-order/${data.orderID}`, {
                 method: "POST",
                 headers: {
                   "Accept": "application/json",

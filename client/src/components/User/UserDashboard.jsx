@@ -134,7 +134,7 @@ const UserDashBoard = () => {
     
     const fetchReports = async () => {
       try {
-  const response = await fetch("https://technovista-nine.vercel.app/api/issues/minimal-report");
+  const response = await fetch("https://technovista-backend.onrender.com/api/issues/minimal-report");
         const data = await response.json();
         // Filter reports by email instead of phone
         const filtered = data.filter((report) => report.email === user.email);

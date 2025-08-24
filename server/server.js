@@ -37,14 +37,20 @@ const { initIO } = require('./socket');
 
 // Enable CORS for Vercel frontend
 app.use(cors({
-  origin: "https://technovista-nine.vercel.app",
+  origin: [
+    "http://localhost:5173",
+    "https://technovista-nine.vercel.app"
+  ],
   credentials: true
 }));
 const server = http.createServer(app);
 
 const io = socketIo(server, {
   cors: {
-    origin: "https://technovista-nine.vercel.app",
+    origin: [
+      "http://localhost:5173",
+      "https://technovista-nine.vercel.app"
+    ],
     methods: ["GET", "POST", "PATCH"],
     credentials: true
   }
