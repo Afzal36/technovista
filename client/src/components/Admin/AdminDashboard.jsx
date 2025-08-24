@@ -10,7 +10,7 @@ function AdminDashboard() {
 
   // Fetch all worker requests
   useEffect(() => {
-    fetch("http://localhost:5000/api/admin/workers")
+  fetch("https://technovista-nine.vercel.app/api/admin/workers")
       .then((res) => res.json())
       .then((data) => {
         setWorkers(data);
@@ -22,7 +22,7 @@ function AdminDashboard() {
   // Accept worker
   const handleAccept = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/accept-worker/${id}`, {
+  const res = await fetch(`https://technovista-nine.vercel.app/api/admin/accept-worker/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" }
       });
@@ -41,7 +41,7 @@ function AdminDashboard() {
   // Decline worker
   const handleDecline = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/workers/${id}`, {
+  const res = await fetch(`https://technovista-nine.vercel.app/api/admin/workers/${id}`, {
         method: "DELETE",
       });
       if (res.ok) {

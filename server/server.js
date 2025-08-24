@@ -24,12 +24,18 @@ dotenv.config();
 const { initIO } = require('./socket');
 
 const app = express();
+// Enable CORS for Vercel frontend
+app.use(cors({
+  origin: "https://technovista-nine.vercel.app",
+  credentials: true
+}));
 const server = http.createServer(app);
 
 const io = socketIo(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST", "PATCH"]
+    origin: "https://technovista-nine.vercel.app",
+    methods: ["GET", "POST", "PATCH"],
+    credentials: true
   }
 });
 initIO(io);

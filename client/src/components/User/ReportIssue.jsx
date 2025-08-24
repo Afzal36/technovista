@@ -138,7 +138,7 @@ const ReportIssue = () => {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/predict', {
+  const response = await fetch('https://technovista-nine.vercel.app/predict', {
         method: 'POST',
         body: formData,
       });
@@ -180,7 +180,7 @@ const ReportIssue = () => {
         };
         console.log('Payload to send:', payload);
         try {
-          const postRes = await fetch('http://localhost:5000/api/issues/minimal-report', {
+          const postRes = await fetch('https://technovista-nine.vercel.app/api/issues/minimal-report', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

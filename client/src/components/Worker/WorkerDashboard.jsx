@@ -63,7 +63,7 @@ function WorkerDashboard() {
   // Fetch reports for this worker's category
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:5000/api/issues/minimal-report")
+  fetch("https://technovista-nine.vercel.app/api/issues/minimal-report")
       .then((res) => res.json())
       .then((data) => {
         // Only show reports matching worker's category
@@ -87,7 +87,7 @@ function WorkerDashboard() {
       console.log("Accepting report:", reportId, "for user:", userEmail);
       console.log("Technician email:", user.email);
       
-      const res = await fetch(`http://localhost:5000/api/issues/minimal-report/${reportId}`, {
+  const res = await fetch(`https://technovista-nine.vercel.app/api/issues/minimal-report/${reportId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -273,7 +273,7 @@ function WorkerDashboard() {
                     style={{ marginLeft: '10px', background: '#28a745', color: 'white', border: 'none', borderRadius: '6px', padding: '0.5rem 1.2rem', fontWeight: 600, cursor: 'pointer' }}
                     onClick={async () => {
                       try {
-                        const res = await fetch(`http://localhost:5000/api/issues/minimal-report/${report._id}`, {
+                        const res = await fetch(`https://technovista-nine.vercel.app/api/issues/minimal-report/${report._id}`, {
                           method: "PATCH",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({ status: "resolved" })

@@ -12,7 +12,7 @@ export const SocketProvider = ({ userId, children }) => {
   useEffect(() => {
     if (!userId) return;
 
-    const newSocket = io("http://localhost:5000");
+  const newSocket = io("https://technovista-nine.vercel.app");
     newSocket.emit("register", { userId });
     setSocket(newSocket);
 

@@ -45,7 +45,7 @@ const sendInvoiceEmail = async (pdfBlob, paymentAmount, paymentPurpose, setError
     console.log('📤 Sending request to server...');
 
     // Send request
-    const res = await fetch('http://localhost:5000/api/send-mail/send-email', {
+  const res = await fetch('https://technovista-nine.vercel.app/api/send-mail/send-email', {
       method: 'POST',
       body: formData,
     });
@@ -229,7 +229,7 @@ const AdminPaymentPage = () => {
               setLoading(true);
               setError(null);
 
-              const res = await fetch("http://localhost:5000/create-order", {
+              const res = await fetch("https://technovista-nine.vercel.app/create-order", {
                 method: "POST",
                 headers: { 
                   "Content-Type": "application/json",
@@ -269,7 +269,7 @@ const AdminPaymentPage = () => {
               setLoading(true);
               setError(null);
 
-              const res = await fetch(`http://localhost:5000/capture-order/${data.orderID}`, {
+              const res = await fetch(`https://technovista-nine.vercel.app/capture-order/${data.orderID}`, {
                 method: "POST",
                 headers: {
                   "Accept": "application/json",

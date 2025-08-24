@@ -1,7 +1,7 @@
 // socket.js - Make sure your client socket is configured properly
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000", {
+const socket = io("https://technovista-nine.vercel.app", {
   cors: {
     origin: "*",
     methods: ["GET", "POST", "PATCH"]
