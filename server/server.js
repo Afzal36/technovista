@@ -1,3 +1,7 @@
+// Global error handler to always return JSON
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).json({ error: err.message || "Internal Server Error" });
+});
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
