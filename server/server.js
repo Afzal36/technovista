@@ -1,7 +1,3 @@
-// Global error handler to always return JSON
-app.use((err, req, res, next) => {
-  res.status(err.status || 500).json({ error: err.message || "Internal Server Error" });
-});
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -10,6 +6,7 @@ const dotenv = require("dotenv");
 const axios = require('axios');
 const http = require("http");
 const socketIo = require("socket.io");
+const app = express();
 
 // Route imports
 const imageClassifierRoute = require("./routes/imageClassifier");
@@ -23,11 +20,21 @@ const emailRoute=require('../server/routes/nodemailer')
 
 const issueReportRoutes = require('./routes/issueReports'); 
 
+// Global error handler to always return JSON
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).json({ error: err.message || "Internal Server Error" });
+});
+// Global error handler to always return JSON
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).json({ error: err.message || "Internal Server Error" });
+});
+
+
 dotenv.config();
 
 const { initIO } = require('./socket');
 
-const app = express();
+
 // Enable CORS for Vercel frontend
 app.use(cors({
   origin: "https://technovista-nine.vercel.app",
